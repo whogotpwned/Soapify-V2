@@ -20,12 +20,9 @@ ion-page
 import {IonButton, IonInput, IonItem, IonList, IonLoading, IonPage, loadingController} from '@ionic/vue';
 
 import {ref} from 'vue';
-import {supabase} from "@/lib/supabase/supabaseClient";
 import router from "@/router";
 import {userSessionStore} from "@/lib/store/userSession";
-import {checkIfUserWithUIDExistsInUsersTable, getAvatarForID} from "@/lib/supabase/supabaseMethods";
 import {error_toast, success_toast} from "@/views/toasts/messages";
-import {getUserDetailsOfUserWithID} from "@/lib/supabase/supabaseMethods";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {insertUser} from "@/lib/graphQL/mutations";
 

@@ -1,0 +1,33 @@
+ion-card {
+    height: 200px;
+}
+
+#addButton {
+    margin-bottom: 10px;
+    float: right;
+    right: 0;
+}
+
+#alone iframe {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+@font-face {
+    font-family: 'spongebobregular';
+    src: url('../../../resources/fonts/SpongeboyRegular-gx2n6.otf') format('opentype'),
+         url('../../../resources/fonts/SpongeboyRegular-gx2n6.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#forever-alone-head {
+    font-family: 'spongebobregular';
+    font-size: 50px;
+    color: #ffffff;
+    text-align: center;
+    margin-top: 50px;
+}

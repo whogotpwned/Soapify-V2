@@ -1,0 +1,66 @@
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+#recordingButton {
+    margin-bottom: 10px;
+    float: right;
+    right: 0;
+}
+
+#dialoguePartnerToolbar {
+    height: 100px;
+}
+
+#wrapper {
+    right: 0;
+    padding-left: 30px;
+    padding-top: 20px;
+}
+#dialoguePartnerAvatar {
+    display: inline-block;
+    width:60px;
+    height:160px;
+}
+#dialoguePartnerName {
+    display: inline-block;
+    width:300px;
+    height:120px;
+}
+
+#dialoguePartnerName ion-title {
+    font-size: 9pt;
+}
+
+@font-face {
+    font-family: 'spongebobregular';
+    src: url('../../../resources/fonts/SpongeboyRegular-gx2n6.otf') format('opentype'),
+    url('../../../resources/fonts/SpongeboyRegular-gx2n6.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#forever-alone-head {
+    font-family: 'spongebobregular';
+    font-size: 50px;
+    color: #ffffff;
+    text-align: center;
+    margin-top: 50px;
+}
+
+#alone img {
+    align-items: center;
+}

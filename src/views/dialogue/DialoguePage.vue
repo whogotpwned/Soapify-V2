@@ -1,0 +1,491 @@
+<template lang="pug">
+ion-page
+  ion-loading(message="Lade Dialoge ...")
+  ion-header
+    ion-toolbar
+      ion-toolbar(id="dialoguePartnerToolbar")
+        div(id="wrapper" v-if="store.getLastActiveChatWasWithID")
+          div(id="dialoguePartnerAvatar")
+            ion-avatar
+              img(:src='store.getCurrentDialoguePartner.avatarUrl')
+          div(id="dialoguePartnerName")
+            ion-title {{ store.currentDialoguePartner.user_id }}
+
+      ion-searchbar(id="open-modal" :cancel-button-icon="trash" :placeholder="searchbarPlaceholder"
+        show-cancel-button="always" @ionCancel="clearSearch" @ionFocus="openModal")
+
+    div(v-if="audioElementsToBeDeleted.length > 0")
+      ion-button(id="deleteAllCheckedBoxes" fill="clear" @click="deleteMarkedCheckboxes") Ausgewählte Elemente löschen
+        ion-icon(slot="end")
+
+  ion-content(:fullscreen="true")
+    div(v-if="!store.lastActiveChatWasWithID" id="alone")
+      div(align="center")
+        h1(id="forever-alone-head") 🧐
+        h3 Nothing to see here ...
+
+    ion-refresher(slot="fixed" @ionRefresh="handleRefresh($event)")
+      ion-refresher-content
+
+    ion-header(collapse="condense")
+      ion-toolbar
+        ion-title(size="large") Dialoge
+
+    ExploreContainer(name="Tab 1 page")
+
+    div(v-if="store.lastActiveChatWasWithID")
+      div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
+        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.tags" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+
+  ion-footer
+    ion-toolbar
+      div(v-if="store.currentDialoguePartner.user_id")
+        div(v-if="!isRecording")
+          ion-button(id="recordingButton" shape="round" @click="startRecording()")
+            ion-icon(slot="icon-only" :icon="recordingOutline")
+        div(v-else)
+          ion-button(id="recordingButton" shape="round" @click="stopRecording()")
+            ion-icon(slot="icon-only" :icon="stopCircleOutline")
+</template>
+
+<script lang="ts" setup>
+import {ref} from 'vue'
+import {modalController, onIonViewWillEnter} from "@ionic/vue";
+import Swal from "sweetalert2";
+import {useSpeechRecognition} from '@vueuse/core'
+import {v4 as uuidv4} from 'uuid';
+import Modal from "@/components/modals/contact/search/SearchContactModal.vue";
+import _ from 'lodash';
+import {supabase} from "@/lib/supabase/supabaseClient";
+import {
+  getAvatarForID,
+  getChatsOfUserWithIDSentToUserWithID,
+  getChipsOfSpecificDialogBetweenUserAndContact,
+  getUserDetailsOfUserWithID,
+  getUserSession,
+  messageSentByMe
+} from "@/lib/supabase/supabaseMethods";
+import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
+import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController} from '@ionic/vue';
+import ExploreContainer from '@/components/ExploreContainer.vue';
+import AudioElement from "@/components/audio/AudioElement.vue";
+import {VoiceRecorder} from "capacitor-voice-recorder";
+import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
+import {userSessionStore} from "@/lib/store/userSession";
+import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
+
+const {
+  result,
+  start,
+  stop,
+} = useSpeechRecognition({
+  lang: 'de-DE',
+  interimResults: false,
+  continuous: false,
+})
+
+const store = userSessionStore();
+const audiosMerged = ref([] as Array<Object>);
+const currentDialoguePartner = ref({});
+const isRecording = ref(false);
+const searchTerm = ref('');
+const searchbarPlaceholder = ref('Suche ...');
+const audiosBackupMerged = ref([] as Array<Object>);
+const audioElementsToBeDeleted = ref([] as Array<String>);
+
+
+const showLoading = async () => {
+  const loading = await loadingController.create({
+    message: 'Lade Dialoge ...',
+  });
+  loading.present();
+};
+
+const stopLoading = async () => {
+  await loadingController.dismiss();
+};
+
+
+onIonViewWillEnter(() => {
+  refreshAllChats();
+})
+
+getUserSession().then((session_id) => {
+  store.setSessionID(session_id);
+});
+
+if (store.getLastActiveChatWasWithID) {
+  currentDialoguePartner.value.user_id = store.getLastActiveChatWasWithID;
+}
+
+async function refreshAllChats() {
+  if (!store.getLastActiveChatWasWithID) {
+    return
+  }
+  await showLoading();
+  audiosMerged.value = [];
+
+  let dialog_partner_id = currentDialoguePartner.value.user_id;
+  store.updateCurrentDialoguePartnerAttribute('user_id', currentDialoguePartner.value.user_id);
+
+  let avatarURLSender = await store.getAvatarUrlFromContactInformationForID(dialog_partner_id);
+  store.updateCurrentDialoguePartnerAttribute('avatarUrl', avatarURLSender)
+  currentDialoguePartner.value.avatarUrl = avatarURLSender;
+
+  if (currentDialoguePartner && dialog_partner_id) {
+    // get all chats and relevant details sent by me
+    getAvatarForID(store.getSessionID).then((senderAvatar) => {
+      getChatsOfUserWithIDSentToUserWithID(store.getSessionID, dialog_partner_id).then((chats) => {
+        chats.forEach((chat) => {
+          audiosMerged.value.push({
+            id: chat.chat_id,
+            created_at: chat.created_at,
+            sentByMe: true,
+            senderAvatar: senderAvatar,
+            record: chat.audio,
+            title: chat.title,
+            spokenText: chat.speech_to_text,
+            tags: chat.chips
+          })
+        });
+      });
+    })
+
+    if (dialog_partner_id) {
+      // get all chats and relevant details received by me
+      getAvatarForID(dialog_partner_id).then((senderAvatar) => {
+        if (store.getSessionID != dialog_partner_id) {
+          getChatsOfUserWithIDSentToUserWithID(dialog_partner_id, store.getSessionID).then((chats) => {
+            chats.forEach((chat) => {
+              audiosMerged.value.push({
+                id: chat.chat_id,
+                created_at: chat.created_at,
+                senderAvatar: senderAvatar,
+                sentByMe: false,
+                record: chat.audio,
+                title: chat.title,
+                spokenText: chat.speech_to_text,
+                tags: chat.chips
+              })
+            });
+          });
+        }
+      });
+    }
+  }
+  setTimeout(async () => {
+    await stopLoading();
+  }, 500);
+}
+
+function getAudiosMerged() {
+  return audiosMerged.value.sort((a: any, b: any) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  })
+}
+
+function handleRefresh(event: any) {
+  try {
+    refreshAllChats();
+    success_toast.fire({
+      icon: 'success',
+      title: 'Chats aktualisiert'
+    });
+  } catch (e) {
+    error_toast.fire({
+      icon: 'error',
+      title: 'Chats konnten nicht aktualisiert werden'
+    });
+  } finally {
+    event.target.complete();
+  }
+}
+
+const openModal = async () => {
+  audiosBackupMerged.value = _.cloneDeep(audiosMerged.value);
+  const modal = await modalController.create({
+    component: Modal,
+  });
+  modal.present();
+};
+
+// TODO: @ay: this is the default way of listening to changes in db
+supabase.channel('table_db_changes')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'chats',
+    }, (payload) => {
+
+      if (payload.eventType === 'INSERT') {
+        // here someone sent me a message ...
+        if (payload.new.contact == store.getSessionID) {
+          audiosMerged.value.push(payload.new);
+          audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          })
+        }
+      } else if (payload.eventType === 'DELETE') {
+        console.log("DELETE ....");
+      }
+
+    }).subscribe();
+
+window.addEventListener('search', (event: any) => {
+  searchTerm.value = event.detail.chipSuche;
+  /* only keep those cards which contain a tag matching chipSuche */
+  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+    return audio.tags.some((tag: any) => {
+      return tag.value.includes(searchTerm.value);
+    });
+  });
+  searchbarPlaceholder.value = `chipSuche:[${event.detail.chipSuche}]`;
+});
+
+window.addEventListener('addChip', (event: any) => {
+  // add the tag to the json object of the respective audio element matching the id
+  const tagID = uuidv4();
+  audiosMerged.value = audiosMerged.value.map((audio: any) => {
+    if (audio.id === event.detail.id) {
+      // extend object by tag
+      audio.tags.push({id: tagID, value: event.detail.tag});
+    }
+    return audio;
+  });
+
+  getUserSession().then((current_user_id) => {
+    let from = current_user_id;
+    let to = currentDialoguePartner.value.user_id;
+
+    if (!event.detail.isSender) {
+      from = currentDialoguePartner.value.user_id;
+      to = current_user_id;
+    }
+
+    getChipsOfSpecificDialogBetweenUserAndContact(from, to, event.detail.id).then(async (chips) => {
+      let currentChips = chips[0].chips;
+      let newChip = [{id: tagID, value: event.detail.tag}];
+      let updatedChips = currentChips.concat(newChip);
+
+      // delete elements from updatedChips where id has duplicate
+      updatedChips = updatedChips.filter((item: any, index: any, self: any) =>
+              index === self.findIndex((t: any) => (
+                  t.id === item.id
+              ))
+      )
+
+      await supabase
+          .from('chats')
+          .update({chips: updatedChips})
+          .match({'user_id': from, 'contact': to, 'chat_id': event.detail.id}).then((result) => {
+            if (!result.error) {
+              console.log("Tag erfolgreich hinzugefügt");
+            }
+          });
+    })
+  });
+});
+
+window.addEventListener('openDialogue', (event: any) => {
+  currentDialoguePartner.value = {
+    user: event.detail.user,
+    user_id: event.detail.user_id,
+    email: event.detail.email,
+    avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
+  };
+});
+
+window.addEventListener('deleteTag', (event: any) => {
+  audiosMerged.value = audiosMerged.value.map((audio: any) => {
+    if (audio.id === event.detail.id) {
+      // remove tag from object
+      audio.tags = audio.tags.filter((tag: any) => {
+        return tag.id !== event.detail.tag.id;
+      });
+      getUserSession().then((current_user_id) => {
+        supabase
+            .from('chats')
+            .update({
+              chips: audio.tags
+            })
+            .match({
+              'user_id': current_user_id,
+              'contact': currentDialoguePartner.value.user_id,
+              'chat_id': event.detail.id
+            }).then((result) => {
+          if (!result.error) {
+            console.log("Tag erfolgreich gelöscht");
+          }
+        });
+      });
+    }
+    return audio;
+  });
+});
+
+window.addEventListener('deleteElement', (event: any) => {
+  getUserSession().then((current_user_id) => {
+    messageSentByMe(current_user_id, event.detail.id).then((sentByMe) => {
+      if (sentByMe) {
+        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+          return audio.id !== event.detail.id;
+        });
+
+        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+          return audio.id !== event.detail.id;
+        });
+
+        supabase
+            .from('chats')
+            .delete()
+            .match({
+              'user_id': current_user_id,
+              'chat_id': event.detail.id
+            }).then((result) => {
+
+          if (!result.error) {
+            console.log("Element erfolgreich gelöscht");
+          }
+        });
+      } else {
+        error_toast.fire({
+          icon: 'error',
+          title: 'Empfangene Nachrichten können aktuell nicht gelöscht werden.'
+        });
+      }
+    })
+    currentDialoguePartner.value = {};
+
+  });
+});
+
+window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
+  const checked = event.detail.boxChecked;
+  const targetID = event.detail.id;
+
+  if (checked) {
+    audioElementsToBeDeleted.value = audioElementsToBeDeleted.value.filter((element: any) => {
+      return targetID !== element;
+    })
+  } else {
+    audioElementsToBeDeleted.value.push(targetID)
+  }
+});
+
+function deleteMarkedCheckboxes() {
+  Swal.fire({
+    title: 'Ausgewählte Elemente wirklich unwiderruflich löschen?',
+    showCancelButton: true,
+    confirmButtonText: 'Löschen',
+    denyButtonText: `Don't save`,
+    heightAuto: false
+  }).then((result) => {
+    if (result.isConfirmed) {
+      try {
+        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+          return !audioElementsToBeDeleted.value.includes(audio.id)
+        });
+
+        getUserSession().then((current_user_id) => {
+          supabase
+              .from('chats')
+              .delete()
+              .in('chat_id', audioElementsToBeDeleted.value)
+              .eq('user_id', current_user_id)
+              .then((result) => {
+                audioElementsToBeDeleted.value = []
+                if (!result.error) {
+                  console.log("Element erfolgreich gelöscht");
+                }
+              });
+
+        })
+
+      } catch (e) {
+        Swal.fire({
+          title: 'Fehler :(',
+          text: 'Löschen fehlerhaft',
+          icon: 'error',
+          confirmButtonText: 'Cool',
+          heightAuto: false
+        })
+      }
+    }
+  });
+}
+
+async function requestPermission() {
+  return (await VoiceRecorder.requestAudioRecordingPermission()).value;
+}
+
+async function startRecording() {
+  start();
+  await requestPermission();
+
+  aufnahmeGestartetToast.fire({
+    icon: 'success',
+    title: 'Aufnahme gestartet'
+  });
+  isRecording.value = true;
+  return (await VoiceRecorder.startRecording()).value;
+}
+
+async function stopRecording() {
+  stop();
+  const recordedAudio = (await VoiceRecorder.stopRecording()).value;
+  const audioBase64 = recordedAudio.recordDataBase64;
+  const chat_id = uuidv4();
+  const title = 'Recording: ' + getCurrentDateTimestamp();
+  isRecording.value = false;
+
+  getUserSession().then(async (session) => {
+    // declare variable for target id which is currentDialoguePartner.value.user_id if exists and session else
+    let target_id = '';
+    let avatarID = '';
+
+    if (currentDialoguePartner.value.user_id) {
+      target_id = currentDialoguePartner.value.user_id;
+      avatarID = session;
+    } else {
+      target_id = session;
+      avatarID = currentDialoguePartner.value.user_id;
+    }
+
+    const senderAvatar = await getAvatarForID(avatarID);
+
+    audiosMerged.value.push({
+      id: chat_id,
+      record: audioBase64,
+      senderAvatar: senderAvatar,
+      sentByMe: true,
+      title: title,
+      spokenText: result.value,
+      tags: []
+    });
+
+    supabase.from('chats').insert([
+      {
+        user_id: session,
+        contact: target_id,
+        audio: audioBase64,
+        title: title,
+        chips: [],
+        speech_to_text: result.value,
+        chat_id: chat_id
+      }
+    ]).then((result) => {
+      console.log(result);
+    })
+  });
+}
+
+function clearSearch() {
+  audiosMerged.value = audiosBackupMerged.value;
+  audiosBackupMerged.value = [];
+  searchbarPlaceholder.value = 'Suche ...';
+}
+</script>
+
+<style scoped>
+@import './style.css';
+</style>

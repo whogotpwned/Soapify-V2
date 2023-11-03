@@ -1,0 +1,26 @@
+
+#banner {
+    width: 70vw;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+#chatsList {
+    padding-top: 20px;
+}
+
+#chatElement {
+    height: 90px;
+    font-size: 30px;
+}
+
+#forever-alone-head {
+    font-size: 50px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}

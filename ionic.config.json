@@ -1,0 +1,8 @@
+{
+  "name": "Soapify",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite",
+  "id": "4980f8c7"
+}

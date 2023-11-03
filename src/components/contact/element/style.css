@@ -1,0 +1,35 @@
+.onhover {
+    background-color: #1e1e1e;
+    border: none;
+    color: black;
+    padding: 16px 32px;
+    text-align: left;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.onhover:hover {
+    background-color: #2a2a2a;
+    color: white;
+}
+
+img {
+    border-radius: 30%;
+}
+
+.image_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 30px;
+}
+
+#deleteButton {
+    margin-left: 0;
+    margin-right: auto;
+    float: right;
+}

@@ -65,7 +65,6 @@ async function login() {
     const signInSuccessful = signInResult.error ? false : true
     const emailUnverified = !signInResult.session.user.emailVerified;
 
-
     if (signInSuccessful) {
       if (emailUnverified) {
         error_toast.fire({
@@ -78,7 +77,6 @@ async function login() {
         const userAvatarUrl = signInResult.session.user.avatarUrl
         const userDisplayName = signInResult.session.user.displayName
 
-
         const anyContactInformationIsNull = [store.getSessionID, store.getEmail, store.getAvatarURL, store.getUsername]
             .some(ele => (ele === null || ele === "" || ele === undefined));
 
@@ -89,13 +87,20 @@ async function login() {
           store.setAvatarURL(userAvatarUrl);
         }
 
-        const insertUserResult = await nhost.graphql.request(insertUser(userEmail, userID, userDisplayName));
+
+        const insertUserResult = await nhost.graphql.request(insertUser, {
+          user_id: userID,
+          username: userDisplayName,
+          email: userEmail,
+        });
 
         // listen for auth events (e.g. sign in, sign out, refresh)
         // set session based on the auth event
         nhost.auth.onAuthStateChanged((event, session) => {
           store.setSessionID(<string>nhost.auth.getSession()?.accessToken);
         })
+
+        console.log(insertUserResult);
 
         if (insertUserResult.data) {
           success_toast.fire({
@@ -107,7 +112,6 @@ async function login() {
         }
       }
     }
-
   } catch (e) {
     error_toast.fire({
       icon: 'error',

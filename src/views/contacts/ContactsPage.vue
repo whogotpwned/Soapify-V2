@@ -53,13 +53,17 @@ import {
   getUserSession
 } from "@/lib/supabase/supabaseMethods";
 import {supabase} from "@/lib/supabase/supabaseClient";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import Swal from "sweetalert2";
 import {modalController} from "@ionic/vue";
 import AddContactModal from "@/components/modals/contact/add/AddContactModal.vue";
 import {error_toast, success_toast} from "@/views/toasts/messages";
 import {userSessionStore} from "@/lib/store/userSession";
 import {presentAlert, presentSuccess} from "@/views/toasts/alerts";
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import {countNumberOfUsersWithId, getUser} from "@/lib/graphQL/queries";
+import {insertOneContact} from "@/lib/graphQL/mutations";
+import {sha256} from "@/views/contacts/methods";
 
 const contacts = ref([] as Array<Object>);
 const store = userSessionStore();
@@ -77,10 +81,10 @@ const stopLoading = async () => {
 
 
 onIonViewDidEnter(() => {
-  loadAllContacts();
+  //loadAllContacts();
 });
 
-loadAllContacts();
+//loadAllContacts();
 
 const handleRefresh = (event: CustomEvent) => {
   loadAllContacts().then(() => {
@@ -91,43 +95,43 @@ const handleRefresh = (event: CustomEvent) => {
   })
 };
 
-async function loadAllContacts() {
-  contacts.value = []
-
-  try {
-    if (store.getContactInformation.length == 0) {
-      const contactsOfUserWithID = await getContactsOfUserWithId(store.getSessionID);
-
-      for (const element of contactsOfUserWithID) {
-
-        let userDetailsOfUserWithID = await getUserDetailsOfUserWithID(element.contact);
-
-        const avatar = await getAvatarForID(element.contact);
-
-        if (!audioElementsContainElementWithUerID(userDetailsOfUserWithID.user_id)) {
-
-          const contactDetails = {
-            username: userDetailsOfUserWithID.username,
-            avatarSrc: avatar,
-            user_id: userDetailsOfUserWithID.user_id,
-            email: userDetailsOfUserWithID.email
-          }
-
-          contacts.value.push(contactDetails);
-          store.addToContactInformation(contactDetails);
-        }
-      }
-    } else {
-      contacts.value = store.getContactInformation;
-
-    }
-  } catch (e) {
-    await error_toast.fire({
-      title: 'Error',
-      text: "Kontakte konnten nicht geladen werden"
-    });
-  }
-}
+// async function loadAllContacts() {
+//   contacts.value = []
+//
+//   try {
+//     if (store.getContactInformation.length == 0) {
+//       const contactsOfUserWithID = await getContactsOfUserWithId(store.getSessionID);
+//
+//       for (const element of contactsOfUserWithID) {
+//
+//         let userDetailsOfUserWithID = await getUserDetailsOfUserWithID(element.contact);
+//
+//         const avatar = await getAvatarForID(element.contact);
+//
+//         if (!audioElementsContainElementWithUerID(userDetailsOfUserWithID.user_id)) {
+//
+//           const contactDetails = {
+//             username: userDetailsOfUserWithID.username,
+//             avatarSrc: avatar,
+//             user_id: userDetailsOfUserWithID.user_id,
+//             email: userDetailsOfUserWithID.email
+//           }
+//
+//           contacts.value.push(contactDetails);
+//           store.addToContactInformation(contactDetails);
+//         }
+//       }
+//     } else {
+//       contacts.value = store.getContactInformation;
+//
+//     }
+//   } catch (e) {
+//     await error_toast.fire({
+//       title: 'Error',
+//       text: "Kontakte konnten nicht geladen werden"
+//     });
+//   }
+// }
 
 function audioElementsContainElementWithUerID(id) {
   let containsElement = false;
@@ -223,52 +227,87 @@ window.addEventListener('deleteUserWithId', (event: any) => {
 });
 
 
+async function queriedUserExists(targetUserID: string) {
+  const result = await nhost.graphql.request(countNumberOfUsersWithId, {user_id: targetUserID});
+
+  return result.data.userdetails_aggregate.aggregate.count > 0;
+}
+
+
 // listener to listen for event idContactSearch from addcontactModal.vue
 window.addEventListener('idContactSearch', async (event: any) => {
+
   const idToBeAdded = event.detail.idSuche;
 
   const contactInList = contactsContainContactWithID(idToBeAdded);
+
 
   if (contactInList) {
     await presentAlert('Kontakt ist bereits in Liste ...')
     return;
   } else {
-    getUserSession().then((result) => {
-      checkIfUserExistsInAuth(idToBeAdded).then(async (exists) => {
-        if (exists) {
-          const {_, error} = await supabase.from('contacts').insert([
-            {
-              user_id: result,
-              contact: event.detail.idSuche
-            }
-          ])
-          if (error) {
-            await presentAlert('Fehler beim Hinzufügen des Kontaktes');
-          } else {
-            await presentSuccess('Kontakt erfolgreich hinzugefügt');
-          }
-          getUserDetailsOfUserWithID(idToBeAdded).then(async (u) => {
-            const avatar = await getAvatarForID(idToBeAdded);
-            contacts.value.push({
-              username: u.username,
-              avatarSrc: avatar,
-              user_id: u.user_id,
-              email: u.email
-            });
-            if (!store.contactsContainUserWithID(u.user_id)) {
-              store.addToContactInformation({
-                username: u.username,
-                avatarSrc: avatar,
-                user_id: u.user_id,
-                email: u.email
-              })
-            }
+
+    const userExists = await queriedUserExists(idToBeAdded);
+
+    if (userExists) {
+
+      const getFriendshipHash = await sha256(`${store.getSessionID},${idToBeAdded}`);
+
+      const insertContactResult = await nhost.graphql.request(insertOneContact,
+          {
+            contact: idToBeAdded,
+            user_id: store.getSessionID,
+            friendship_hash: getFriendshipHash
           });
-        } else {
-          await presentAlert('Kontakt scheint nicht zu existieren ...');
-        }
-      })
-    });
+
+      if (insertContactResult.error) {
+        await presentAlert('Fehler beim Hinzufügen des Kontaktes');
+        return;
+      } else {
+        await presentSuccess('Kontakt erfolgreich hinzugefügt');
+
+
+      }
+
+
+    }
+
+    // getUserSession().then((result) => {
+    //   checkIfUserExistsInAuth(idToBeAdded).then(async (exists) => {
+    //     if (exists) {
+    //       const {_, error} = await supabase.from('contacts').insert([
+    //         {
+    //           user_id: result,
+    //           contact: event.detail.idSuche
+    //         }
+    //       ])
+    //       if (error) {
+    //         await presentAlert('Fehler beim Hinzufügen des Kontaktes');
+    //       } else {
+    //         await presentSuccess('Kontakt erfolgreich hinzugefügt');
+    //       }
+    //       getUserDetailsOfUserWithID(idToBeAdded).then(async (u) => {
+    //         const avatar = await getAvatarForID(idToBeAdded);
+    //         contacts.value.push({
+    //           username: u.username,
+    //           avatarSrc: avatar,
+    //           user_id: u.user_id,
+    //           email: u.email
+    //         });
+    //         if (!store.contactsContainUserWithID(u.user_id)) {
+    //           store.addToContactInformation({
+    //             username: u.username,
+    //             avatarSrc: avatar,
+    //             user_id: u.user_id,
+    //             email: u.email
+    //           })
+    //         }
+    //       });
+    //    } else {
+    //      await presentAlert('Kontakt scheint nicht zu existieren ...');
+    //   }
+    //  })
+    //});
   }
 });
 </script>

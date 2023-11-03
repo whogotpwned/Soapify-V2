@@ -16,3 +16,13 @@ export const insertUser = gql`
             id
         }
     }`
+
+export const insertOneContact = gql`
+    mutation insertContact($contact: uuid!, $user_id: uuid!, $friendship_hash: String!) {
+        insert_contacts_one(object: {
+            contact: $contact,
+            user_id: $user_id,
+            friendship_hash: $friendship_hash}) {
+            id
+        }
+    }`

@@ -32,7 +32,6 @@ const cancel = () => modalController.dismiss(null, 'cancel');
 
 function confirm() {
 
-  /* send event to parent component Tap1Page.vue */
   const event = new CustomEvent('idContactSearch', {
     detail: {
       idSuche: idSuche.value,

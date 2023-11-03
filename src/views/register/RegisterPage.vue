@@ -88,8 +88,6 @@ function signUp() {
     }
   });
 }
-
-
 </script>
 
 

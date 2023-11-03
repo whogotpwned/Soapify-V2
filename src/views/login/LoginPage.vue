@@ -94,7 +94,7 @@ async function login() {
         // listen for auth events (e.g. sign in, sign out, refresh)
         // set session based on the auth event
         nhost.auth.onAuthStateChanged((event, session) => {
-          store.setSessionID(<string>nhost.auth.getSession()?.accessToken);
+          store.setSessionID(<string>nhost.auth.getUser()?.id);
         })
 
         if (insertUserResult.data) {

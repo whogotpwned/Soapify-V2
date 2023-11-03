@@ -54,6 +54,7 @@ import {logOut, idCardOutline, personOutline, mailOutline} from "ionicons/icons"
 import {checkFileExists} from "@/lib/supabase/supabaseMethods";
 import {error_toast, info_toast, success_toast} from "@/views/toasts/messages";
 import {userSessionStore} from "@/lib/store/userSession";
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 
 const personalID = ref('');
 const personalUsername = ref('');
@@ -174,14 +175,23 @@ getUserID();
 const handleFileUpload = async (event: any) => {
   const file = event.target.files[0];
 
-  supabase.storage
-      .from('avatars')
-      .upload(`${store.getSessionID}/avatar.jpeg`, file, {
-        cacheControl: '3600',
-        upsert: true,
-      }).then(() => {
-    updateAvatar();
+  console.log(file);
+
+  const x = await nhost.storage.upload({file, name: 'avatar.jpeg', bucketId: 'avatars', uploaded_by_user_id: 'sadasdsad',
+    formData: {
+      uploaded_by_user_id: 'sadasdsad'}
   })
+  console.log(x);
+
+
+  // supabase.storage
+  //     .from('avatars')
+  //     .upload(`${store.getSessionID}/avatar.jpeg`, file, {
+  //       cacheControl: '3600',
+  //       upsert: true,
+  //     }).then(() => {
+  //   updateAvatar();
+  // })
 };
 
 async function changeUsername() {

@@ -1,7 +1,5 @@
 export const strings = {
-
     "de": {
-
         "labels": {
             "email": "E-Mail-Adresse",
             "password": "Passwort",
@@ -18,12 +16,8 @@ export const strings = {
             "check-mailbox": "Überprüfe dein E-Mail-Postfach, um die Registrierung abzuschließen",
             "have-account-question": "Hast du bereits einen Account?",
         }
-
-
     },
-
     "en": {}
-
 }
 
 

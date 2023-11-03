@@ -100,8 +100,6 @@ async function login() {
           store.setSessionID(<string>nhost.auth.getSession()?.accessToken);
         })
 
-        console.log(insertUserResult);
-
         if (insertUserResult.data) {
           success_toast.fire({
             icon: 'success',

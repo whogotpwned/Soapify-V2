@@ -5,6 +5,7 @@ import LoginPage from "@/views/login/LoginPage.vue";
 import {userSessionStore} from "@/lib/store/userSession";
 import RegisterPage from "@/views/register/RegisterPage.vue";
 import {supabase} from "@/lib/supabase/supabaseClient";
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 
 const routes: Array<RouteRecordRaw> = [{
     path: '/', redirect: '/tabs/chats',
@@ -36,14 +37,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const userSession = userSessionStore()
 
-    const {data, error} = await supabase.auth.getSession()
-
     if (to.meta.requiresAuth) {
 
         // TODO: Clear this and make it ti userSession
         // UserSession is deleted after refresh but on the other hand data.session has no working timeout ...
         // For development purposes using data.session is fine ...
-        if (data.session) {
+        if (userSession.getSessionID) {
             return next()
         } else {
             return next('/login')

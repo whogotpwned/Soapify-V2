@@ -27,7 +27,7 @@ import {checkIfUserWithUIDExistsInUsersTable, getAvatarForID} from "@/lib/supaba
 import {error_toast, success_toast} from "@/views/toasts/messages";
 import {getUserDetailsOfUserWithID} from "@/lib/supabase/supabaseMethods";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
-import {gql} from "graphql-request";
+import {insertUser} from "@/lib/graphQL/mutations";
 
 let email = ref('');
 let password = ref('');
@@ -57,14 +57,13 @@ async function login() {
   await showLoading();
 
   try {
-
     const signInResult = await nhost.auth.signIn({
       email: email.value,
       password: password.value
     })
 
     const signInSuccessful = signInResult.error ? false : true
-    const emailUnverified = signInResult.session.user.emailVerified === false;
+    const emailUnverified = !signInResult.session.user.emailVerified;
 
 
     if (signInSuccessful) {
@@ -79,81 +78,44 @@ async function login() {
         const userAvatarUrl = signInResult.session.user.avatarUrl
         const userDisplayName = signInResult.session.user.displayName
 
-        console.log(userID)
-        console.log(userEmail)
-        console.log(userDisplayName)
 
         const anyContactInformationIsNull = [store.getSessionID, store.getEmail, store.getAvatarURL, store.getUsername]
             .some(ele => (ele === null || ele === "" || ele === undefined));
 
         if (anyContactInformationIsNull) {
-
           store.setUsername(userDisplayName);
           store.setSessionID(userID);
           store.setEmail(userEmail);
           store.setAvatarURL(userAvatarUrl);
-
         }
-        const insertUsers = gql`
-          mutation MyMutation {
-            insert_userdetails_one(object: {email: "", id: 10, user_id: ""}, on_conflict: {constraint: users_pkey, update_columns: created_at}) {
-              id
-            }
-          }`
 
-        nhost.graphql.request(insertUsers).then((result) => {
-          console.log(result);
+        const insertUserResult = await nhost.graphql.request(insertUser(userEmail, userID, userDisplayName));
+
+        // listen for auth events (e.g. sign in, sign out, refresh)
+        // set session based on the auth event
+        nhost.auth.onAuthStateChanged((event, session) => {
+          store.setSessionID(<string>nhost.auth.getSession()?.accessToken);
         })
 
-
+        if (insertUserResult.data) {
+          success_toast.fire({
+            icon: 'success',
+            title: 'Erfolgreich eingeloggt'
+          }).then(async () => {
+            await router.push('/')
+          })
+        }
       }
     }
 
   } catch (e) {
-
+    error_toast.fire({
+      icon: 'error',
+      title: 'Fehler beim Einloggen'
+    });
+  } finally {
+    await stopLoading();
   }
-
-
-  /*
-    try {
-
-
-        checkIfUserWithUIDExistsInUsersTable(data.user?.id).then((exists) => {
-          if (!exists) {
-            supabase.from("users").insert([{
-              email: email.value,
-              user_id: data?.user?.id
-            }]).then((result) => {
-              console.log(result);
-            })
-          }
-        })
-
-        // initialize the userSession store
-        const userSession = userSessionStore()
-        // listen for auth events (e.g. sign in, sign out, refresh)
-        // set session based on the auth event
-        supabase.auth.onAuthStateChange((event, session) => {
-          userSession.session = session
-        })
-
-        success_toast.fire({
-          icon: 'success',
-          title: 'Erfolgreich eingeloggt'
-        }).then(async () => {
-          await router.push('/')
-        })
-
-      }
-    } catch (e) {
-      error_toast.fire({
-        icon: 'error',
-        title: 'Ungültige Eingabe-Credentials.'
-      })
-    } finally {
-      await stopLoading();
-    }
-  */
 }
 </script>
 

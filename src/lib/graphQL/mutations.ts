@@ -26,3 +26,20 @@ export const insertOneContact = gql`
             id
         }
     }`
+
+
+export const updateUsername = gql`
+    mutation updateUsername($user_id: uuid!, $username: String!) {
+        update_userdetails(where: {
+            user_id: {
+                _eq: $user_id
+            }
+        },_set: {
+            username: $username
+        }) {
+            returning {
+                id
+            }
+        }
+    }
+`

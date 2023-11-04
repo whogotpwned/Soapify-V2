@@ -29,18 +29,16 @@ ion-page
       ion-card-content
         h1(class="center") Avatar
         ion-avatar
-          div(v-if="avatarURL" @click="deleteAvatar")
+          div(v-if="avatarURL")
             ion-avatar(style="width: 100px")
               img(:src="avatarURL"  class="avatarIMG")
           div(v-else)
             ion-img(class="avatarIMG" src="../../resources/no_avatar.png")
 
-        input(accept="image/*" class="custom-file-upload" type="file" @change="handleFileUpload")
-
     ExploreContainer(name="Tab 3 page")
   ion-footer
     ion-toolbar
-      ion-button(id="logoutButton" shape="round" @click="logoutSupabase")
+      ion-button(id="logoutButton" shape="round" @click="logout")
         ion-icon(slot="icon-only" :icon="logOut")
 </template>
 
@@ -55,32 +53,13 @@ import {checkFileExists} from "@/lib/supabase/supabaseMethods";
 import {error_toast, info_toast, success_toast} from "@/views/toasts/messages";
 import {userSessionStore} from "@/lib/store/userSession";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import {updateUsername} from "@/lib/graphQL/mutations";
 
 const personalID = ref('');
 const personalUsername = ref('');
 const personalEmail = ref('');
 const avatarURL = ref('');
 const store = userSessionStore();
-
-async function updateAvatar() {
-  store.setAvatarURL(nhost.storage.getPublicUrl({fileId: store.getSessionID}));
-  avatarURL.value = store.getAvatarURL;
-  console.log(avatarURL.value);
-}
-
-async function deleteAvatar() {
-  nhost.storage.delete({fileId: store.getSessionID}).then(async () => {
-    await updateAvatar();
-  }).then(() => {
-    avatarURL.value = "";
-  })
-}
-
-function resetFileInputField() {
-  const file =
-      document.querySelector('.file');
-  file.value = '';
-}
 
 async function getUsername() {
 
@@ -114,52 +93,26 @@ getPersonalEmail();
 getUserID();
 
 
-const handleFileUpload = async (event: any) => {
-  const file = event.target.files[0];
-
-  console.log(file);
-
-  // console.log(nhost.storage.getPublicUrl({fileId: store.getSessionID}))
-
-  const x = await nhost.storage.upload({file, name: 'avatar.jpeg', id: store.getSessionID, bucketId: 'avatars',
-    uploadedByUserId: 'sadasdsad'})
-
-
-  console.log(x);
-
-  await updateAvatar();
-  // supabase.storage
-  //     .from('avatars')
-  //     .upload(`${store.getSessionID}/avatar.jpeg`, file, {
-  //       cacheControl: '3600',
-  //       upsert: true,
-  //     }).then(() => {
-  //   updateAvatar();
-  // })
-};
-
 async function changeUsername() {
-
-  console.log(personalUsername.value)
-
   try {
-    supabase.from('users')
-        .update({
-          username: personalUsername.value
-        })
-        .eq('user_id', store.getSessionID)
-        .then(async (result) => {
-          console.log(result)
-          // duplicate username error
-          if (result.error?.code === "23505") {
-            error_toast.fire({
-              icon: 'error',
-              title: 'Nutzername existiert bereits'
-            });
-          } else if (!result.error) {
-            store.resetUsername(personalUsername.value)
-          }
-        })
+
+    const updateUsernameResult = await nhost.graphql.request(updateUsername, {
+      user_id: store.getSessionID,
+      username: personalUsername.value
+    })
+
+    if (updateUsernameResult.error) {
+      error_toast.fire({
+        icon: 'error',
+        title: 'Fehler beim Ändern des Nutzernamens'
+      });
+    } else {
+      store.setUsername(personalUsername.value);
+      success_toast.fire({
+        icon: 'success',
+        title: 'Nutzername erfolgreich geändert'
+      });
+    }
   } catch (e) {
     error_toast.fire({
       icon: 'error',
@@ -169,8 +122,9 @@ async function changeUsername() {
 }
 
 
-async function logoutSupabase() {
-  const {error} = await supabase.auth.signOut();
+async function logout() {
+  const {error} = await nhost.auth.signOut();
+
   if (error) {
     console.log(error);
   } else {

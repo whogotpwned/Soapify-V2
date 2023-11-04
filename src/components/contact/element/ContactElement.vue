@@ -6,10 +6,7 @@ ion-item-sliding
   ion-item
     ion-card(ref="htmlRef" class="onhover" @click="openDialogue(user, user_id, email)")
       div(class="image_container")
-        div(v-if="avatarExists")
-          img(:src="avatar" alt="avatar")
-        div(v-else)
-          img(alt="no-avatar" src="/no_avatar.png")
+        img(:src="avatar" alt="avatar")
 
       ion-card-header
         ion-card-title {{ user }}

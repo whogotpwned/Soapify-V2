@@ -47,7 +47,6 @@ import ContactElement from "@/components/contact/element/ContactElement.vue";
 import {add} from "ionicons/icons";
 import {
   getAvatarForID,
-  getContactsOfUserWithId,
   getUserDetailsOfUserWithID,
   checkIfUserExistsInAuth,
   getUserSession
@@ -61,7 +60,7 @@ import {error_toast, success_toast} from "@/views/toasts/messages";
 import {userSessionStore} from "@/lib/store/userSession";
 import {presentAlert, presentSuccess} from "@/views/toasts/alerts";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
-import {countNumberOfUsersWithId, getUser} from "@/lib/graphQL/queries";
+import {countNumberOfUsersWithId, getUser, getContactsOfUserWithId, countNumberOfContactsOfUserWithId} from "@/lib/graphQL/queries";
 import {insertOneContact} from "@/lib/graphQL/mutations";
 import {sha256} from "@/views/contacts/methods";
 
@@ -81,10 +80,10 @@ const stopLoading = async () => {
 
 
 onIonViewDidEnter(() => {
-  //loadAllContacts();
+  loadAllContacts();
 });
 
-//loadAllContacts();
+loadAllContacts();
 
 const handleRefresh = (event: CustomEvent) => {
   loadAllContacts().then(() => {
@@ -95,55 +94,64 @@ const handleRefresh = (event: CustomEvent) => {
   })
 };
 
-// async function loadAllContacts() {
-//   contacts.value = []
-//
-//   try {
-//     if (store.getContactInformation.length == 0) {
-//       const contactsOfUserWithID = await getContactsOfUserWithId(store.getSessionID);
-//
-//       for (const element of contactsOfUserWithID) {
-//
-//         let userDetailsOfUserWithID = await getUserDetailsOfUserWithID(element.contact);
-//
-//         const avatar = await getAvatarForID(element.contact);
-//
-//         if (!audioElementsContainElementWithUerID(userDetailsOfUserWithID.user_id)) {
-//
-//           const contactDetails = {
-//             username: userDetailsOfUserWithID.username,
-//             avatarSrc: avatar,
-//             user_id: userDetailsOfUserWithID.user_id,
-//             email: userDetailsOfUserWithID.email
-//           }
-//
-//           contacts.value.push(contactDetails);
-//           store.addToContactInformation(contactDetails);
-//         }
-//       }
-//     } else {
-//       contacts.value = store.getContactInformation;
-//
-//     }
-//   } catch (e) {
-//     await error_toast.fire({
-//       title: 'Error',
-//       text: "Kontakte konnten nicht geladen werden"
-//     });
-//   }
-// }
+async function refreshAllContactsFromNhost() {
+  contacts.value = [];
+  const contactsSearchResult = await nhost.graphql.request(getContactsOfUserWithId, {user_id: store.getSessionID});
 
-function audioElementsContainElementWithUerID(id) {
-  let containsElement = false;
-  let i;
-  for (i = 0; i < contacts.value.length; i++) {
-    if (contacts.value[i].user_id === id) {
-      return true;
+  const numberOfContacts = contactsSearchResult.data.contacts.length;
+
+  // loop over all contacts
+  for (let i = 0; i < numberOfContacts; i++) {
+
+    const contactId = contactsSearchResult.data.contacts[i].contact;
+
+    const userDetailsOfUserWithID = await nhost.graphql.request(getUser, {user_id: contactId});
+
+    const contactDetails = {
+      username: userDetailsOfUserWithID.data.userdetails[0].username,
+      avatarSrc: userDetailsOfUserWithID.data.userdetails[0].avatar_url,
+      user_id: userDetailsOfUserWithID.data.userdetails[0].user_id,
+      email: userDetailsOfUserWithID.data.userdetails[0].email
     }
+
+    contacts.value.push(contactDetails);
   }
-  return containsElement;
 }
 
+async function refreshAllContactsFromStore() {
+  contacts.value = [];
+  for (let i = 0; i < store.getContactInformation.length; i++) {
+    contacts.value.push(store.getContactInformation[i]);
+  }
+}
+
+
+async function loadAllContacts()  {
+  await showLoading();
+
+  contacts.value = [];
+
+  try {
+    const numberOfContactsForUserWithIdResult = await nhost.graphql.request(countNumberOfContactsOfUserWithId,
+        {user_id: store.getSessionID});
+
+    const numberOfContactsOfUser = numberOfContactsForUserWithIdResult.data.contacts_aggregate.aggregate.count;
+
+    if (store.getContactInformation.length < numberOfContactsOfUser) {
+      await refreshAllContactsFromNhost();
+    } else {
+      await refreshAllContactsFromStore();
+    }
+  } catch (e) {
+    error_toast.fire({
+      icon: 'error',
+      title: 'Fehler beim Laden der Kontakte'
+    });
+  } finally {
+    await stopLoading();
+  }
+
+}
 
 function contactsContainContactWithID(id: string) {
   let i;
@@ -283,47 +291,6 @@ window.addEventListener('idContactSearch', async (event: any) => {
     }
   }
 });
-
-    // getUserSession().then((result) => {
-    //   checkIfUserExistsInAuth(idToBeAdded).then(async (exists) => {
-    //     if (exists) {
-    //       const {_, error} = await supabase.from('contacts').insert([
-    //         {
-    //           user_id: result,
-    //           contact: event.detail.idSuche
-    //         }
-    //       ])
-    //       if (error) {
-    //         await presentAlert('Fehler beim Hinzufügen des Kontaktes');
-    //       } else {
-    //         await presentSuccess('Kontakt erfolgreich hinzugefügt');
-    //       }
-    //       getUserDetailsOfUserWithID(idToBeAdded).then(async (u) => {
-    //         const avatar = await getAvatarForID(idToBeAdded);
-    //         contacts.value.push({
-    //           username: u.username,
-    //           avatarSrc: avatar,
-    //           user_id: u.user_id,
-    //           email: u.email
-    //         });
-    //         if (!store.contactsContainUserWithID(u.user_id)) {
-    //           store.addToContactInformation({
-    //             username: u.username,
-    //             avatarSrc: avatar,
-    //             user_id: u.user_id,
-    //             email: u.email
-    //           })
-    //         }
-    //       });
-    //    } else {
-    //      await presentAlert('Kontakt scheint nicht zu existieren ...');
-    //   }
-    //  })
-    //});
-
-
-
-
 </script>
 
 <style scoped>

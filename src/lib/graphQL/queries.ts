@@ -28,3 +28,20 @@ export const countNumberOfUsersWithId = gql`
             }
         }
     }`
+
+export const getContactsOfUserWithId = gql`
+    query getContactsOfUserWithId($user_id: uuid!) {
+        contacts(where: {user_id: {_eq: $user_id}}) {
+            contact
+        }
+    }`
+
+export const countNumberOfContactsOfUserWithId = gql`
+    query countNumberOfContactsOfUserWithId($user_id: uuid!) {
+        contacts_aggregate(where: {user_id: {_eq: $user_id}}) {
+            aggregate {
+                count(columns: contact, distinct: true)
+            }
+        }
+    }
+`

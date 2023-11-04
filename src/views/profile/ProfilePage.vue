@@ -115,7 +115,6 @@ function getPersonalEmail() {
 
 function refresh() {
   getAvatarURL();
-  console.log(avatarURL.value);
   getUsername();
   getPersonalEmail();
   getUserID();

@@ -142,15 +142,13 @@ async function loadAllContacts()  {
     } else {
       await refreshAllContactsFromStore();
     }
+    await stopLoading();
   } catch (e) {
     error_toast.fire({
       icon: 'error',
       title: 'Fehler beim Laden der Kontakte'
     });
-  } finally {
-    await stopLoading();
   }
-
 }
 
 function contactsContainContactWithID(id: string) {

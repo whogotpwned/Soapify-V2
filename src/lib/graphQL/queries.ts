@@ -16,6 +16,7 @@ export const getUser  = gql`
             last_login
             email
             created_at
+            avatar_url
         }
     }`
 

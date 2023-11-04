@@ -228,18 +228,14 @@ window.addEventListener('deleteUserWithId', (event: any) => {
 
 
 async function queriedUserExists(targetUserID: string) {
-  console.log(targetUserID);
-
   const result = await nhost.graphql.request(countNumberOfUsersWithId, {user_id: targetUserID});
 
-  console.log(result.data.userdetails_aggregate.aggregate.count);
   return result.data.userdetails_aggregate.aggregate.count > 0;
 }
 
 
 // listener to listen for event idContactSearch from addcontactModal.vue
 window.addEventListener('idContactSearch', async (event: any) => {
-
   const idToBeAdded = event.detail.idSuche;
 
   const contactInList = contactsContainContactWithID(idToBeAdded);
@@ -252,8 +248,6 @@ window.addEventListener('idContactSearch', async (event: any) => {
 
     const userExists = await queriedUserExists(idToBeAdded);
 
-    console.log(userExists);
-
     if (userExists) {
 
       const getFriendshipHash = await sha256(`${store.getSessionID},${idToBeAdded}`);
@@ -265,19 +259,30 @@ window.addEventListener('idContactSearch', async (event: any) => {
             friendship_hash: getFriendshipHash
           });
 
-      console.log(insertContactResult);
-
       if (insertContactResult.error) {
         await presentAlert('Fehler beim Hinzufügen des Kontaktes');
         return;
       } else {
         await presentSuccess('Kontakt erfolgreich hinzugefügt');
 
+        const getNewContactDetails = await nhost.graphql.request(getUser, {user_id: idToBeAdded});
 
+        const newContact = {
+          username: getNewContactDetails.data.userdetails[0].username,
+          avatarSrc: getNewContactDetails.data.userdetails[0].avatar_url,
+          user_id: getNewContactDetails.data.userdetails[0].user_id,
+          email: getNewContactDetails.data.userdetails[0].email
+        }
+
+        contacts.value.push(newContact);
+
+        if (!store.contactsContainUserWithID(newContact.user_id)) {
+          store.addToContactInformation(newContact)
+        }
       }
-
-
     }
+  }
+});
 
     // getUserSession().then((result) => {
     //   checkIfUserExistsInAuth(idToBeAdded).then(async (exists) => {
@@ -315,8 +320,10 @@ window.addEventListener('idContactSearch', async (event: any) => {
     //   }
     //  })
     //});
-  }
-});
+
+
+
+
 </script>
 
 <style scoped>

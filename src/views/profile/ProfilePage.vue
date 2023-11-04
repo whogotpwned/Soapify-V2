@@ -62,76 +62,18 @@ const personalEmail = ref('');
 const avatarURL = ref('');
 const store = userSessionStore();
 
-const showLoading = async (message: string) => {
-  const loading = await loadingController.create({
-    message: message,
-  });
-  loading.present();
-};
-
-const stopLoading = async () => {
-  await loadingController.dismiss();
-};
-
 async function updateAvatar() {
-  await showLoading("Update Avatar ...");
-
-  checkFileExists('avatars', store.getSessionID).then(async (exists) => {
-    if (exists) {
-      // get public url of the avatar.jpeg file in the avatars bucket under the folder with the user id
-      store.setAvatarURL(supabase.storage
-          .from('avatars')
-          .getPublicUrl(`${store.getSessionID}/avatar.jpeg`)
-          .data.publicUrl);
-
-      avatarURL.value = store.getAvatarURL + '?' + new Date().getTime();
-
-      await stopLoading();
-
-    } else {
-      avatarURL.value = '';
-      await stopLoading();
-    }
-  })
+  store.setAvatarURL(nhost.storage.getPublicUrl({fileId: store.getSessionID}));
+  avatarURL.value = store.getAvatarURL;
+  console.log(avatarURL.value);
 }
 
 async function deleteAvatar() {
-  Swal.fire({
-    title: 'Avatar wirklich löschen?',
-    showCancelButton: true,
-    confirmButtonText: 'Löschen',
-    denyButtonText: `Abbrechen`,
-    heightAuto: false
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await showLoading("Deleting Avatar ...");
-
-        resetFileInputField();
-
-        checkFileExists('avatars', store.getSessionID).then((exists) => {
-          if (exists) {
-            avatarURL.value = supabase.storage
-                .from('avatars')
-                .remove([`${store.getSessionID}/avatar.jpeg`])
-            avatarURL.value = '';
-            store.deleteAvatarUrl();
-          }
-        }).then(async () => {
-          await stopLoading();
-        })
-      } catch (e) {
-        Swal.fire({
-          title: 'Fehler :(',
-          text: 'Löschen fehlerhaft',
-          icon: 'error',
-          confirmButtonText: 'Cool',
-          heightAuto: false
-        })
-      }
-    }
-
-  });
+  nhost.storage.delete({fileId: store.getSessionID}).then(async () => {
+    await updateAvatar();
+  }).then(() => {
+    avatarURL.value = "";
+  })
 }
 
 function resetFileInputField() {
@@ -177,13 +119,15 @@ const handleFileUpload = async (event: any) => {
 
   console.log(file);
 
-  console.log(nhost.storage.getPublicUrl({fileId: store.getSessionID}))
-  /*
+  // console.log(nhost.storage.getPublicUrl({fileId: store.getSessionID}))
+
   const x = await nhost.storage.upload({file, name: 'avatar.jpeg', id: store.getSessionID, bucketId: 'avatars',
     uploadedByUserId: 'sadasdsad'})
-  console.log(x);
-*/
 
+
+  console.log(x);
+
+  await updateAvatar();
   // supabase.storage
   //     .from('avatars')
   //     .upload(`${store.getSessionID}/avatar.jpeg`, file, {
@@ -199,7 +143,6 @@ async function changeUsername() {
   console.log(personalUsername.value)
 
   try {
-    await showLoading("Update Username ...");
     supabase.from('users')
         .update({
           username: personalUsername.value
@@ -216,7 +159,6 @@ async function changeUsername() {
           } else if (!result.error) {
             store.resetUsername(personalUsername.value)
           }
-          await stopLoading();
         })
   } catch (e) {
     error_toast.fire({

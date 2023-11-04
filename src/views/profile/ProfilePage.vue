@@ -177,12 +177,12 @@ const handleFileUpload = async (event: any) => {
 
   console.log(file);
 
-  const x = await nhost.storage.upload({file, name: 'avatar.jpeg', bucketId: 'avatars', uploaded_by_user_id: 'sadasdsad',
-    formData: {
-      uploaded_by_user_id: 'sadasdsad'}
-  })
+  console.log(nhost.storage.getPublicUrl({fileId: store.getSessionID}))
+  /*
+  const x = await nhost.storage.upload({file, name: 'avatar.jpeg', id: store.getSessionID, bucketId: 'avatars',
+    uploadedByUserId: 'sadasdsad'})
   console.log(x);
-
+*/
 
   // supabase.storage
   //     .from('avatars')

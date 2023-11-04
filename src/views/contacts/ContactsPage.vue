@@ -1,8 +1,5 @@
 <template lang="pug">
 ion-page
-
-  ion-loading(message="Lade Kontakte ...")
-
   ion-header
     ion-toolbar
       ion-title Kontakte
@@ -67,18 +64,6 @@ import {sha256} from "@/views/contacts/methods";
 const contacts = ref([] as Array<Object>);
 const store = userSessionStore();
 
-const showLoading = async () => {
-  const loading = await loadingController.create({
-    message: 'Lade Kontakte ...',
-  });
-  loading.present();
-};
-
-const stopLoading = async () => {
-  await loadingController.dismiss();
-};
-
-
 onIonViewDidEnter(() => {
   loadAllContacts();
 });
@@ -127,8 +112,6 @@ async function refreshAllContactsFromStore() {
 
 
 async function loadAllContacts()  {
-  await showLoading();
-
   contacts.value = [];
 
   try {
@@ -142,7 +125,6 @@ async function loadAllContacts()  {
     } else {
       await refreshAllContactsFromStore();
     }
-    await stopLoading();
   } catch (e) {
     error_toast.fire({
       icon: 'error',

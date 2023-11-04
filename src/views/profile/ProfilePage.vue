@@ -15,9 +15,8 @@ ion-page
           ion-row
             ion-col
               ion-avatar
-                div(v-if="avatarURL")
-                  ion-avatar(style="width: 100px")
-                    img(:src="avatarURL"  class="avatarIMG")
+                ion-avatar(style="width: 100px")
+                  img(:src="avatarURL"  class="avatarIMG")
             ion-col
               p Du kannst dein Profilbild ändern, indem du dein Anzeigebild bei Gravatar änderst:
                 br

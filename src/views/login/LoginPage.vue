@@ -89,7 +89,7 @@ async function login() {
 
         const insertUserResult = await nhost.graphql.request(insertUser, {
           user_id: userID,
-          avatar_url: `https://gravatar.com/avatar/${avatarHash}?r=g&default=blank`,
+          avatar_url: `https://gravatar.com/avatar/${avatarHash}`,
           username: userDisplayName,
           email: userEmail,
         });

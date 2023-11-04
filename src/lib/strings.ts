@@ -15,6 +15,9 @@ export const strings = {
             "passwords-mismatch": "Die Passwörter stimmen nicht überein",
             "check-mailbox": "Überprüfe dein E-Mail-Postfach, um die Registrierung abzuschließen",
             "have-account-question": "Hast du bereits einen Account?",
+        },
+
+        "profile": {
         }
     },
     "en": {}

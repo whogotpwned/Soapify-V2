@@ -5,14 +5,7 @@ export const userSessionStore = defineStore({
     id: 'soapify', state: () => ({
         sessionID: '', email: '', avatarURL: '', username: '', contactInformation: [], activeChats: [], lastActiveChatWasWithID: '', currentDialoguePartner: {}
     }), getters: {
-        getSessionID: (state) => state.sessionID,
-        getEmail: (state) => state.email,
-        getAvatarURL: (state) => state.avatarURL,
-        getUsername: (state) => state.username,
-        getContactInformation: (state) => state.contactInformation,
-        getActiveChats: (state) => state.activeChats,
-        getLastActiveChatWasWithID: (state) => state.lastActiveChatWasWithID,
-        getCurrentDialoguePartner: (state) => state.currentDialoguePartner
+        getSessionID: (state) => state.sessionID, getEmail: (state) => state.email, getAvatarURL: (state) => state.avatarURL, getUsername: (state) => state.username, getContactInformation: (state) => state.contactInformation, getActiveChats: (state) => state.activeChats, getLastActiveChatWasWithID: (state) => state.lastActiveChatWasWithID, getCurrentDialoguePartner: (state) => state.currentDialoguePartner
 
     }, actions: {
         setSessionID(sessionID: string) {
@@ -21,6 +14,8 @@ export const userSessionStore = defineStore({
             this.email = email;
         }, setAvatarURL(avatarURL: string) {
             this.avatarURL = avatarURL;
+        }, resetAvatarURL() {
+            this.avatarURL = '';
         }, setUsername(username: string) {
             this.username = username;
         }, setContactInformation(contactInformation: object) {

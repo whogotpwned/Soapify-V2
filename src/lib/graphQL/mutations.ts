@@ -1,12 +1,13 @@
 import {gql} from "graphql-request";
 
 export const insertUser = gql`
-    mutation insertNewUser($email: String!, $user_id: uuid!, $username: String!) {
+    mutation insertNewUser($email: String!, $user_id: uuid!, $username: String!, $avatar_url: String!) {
         insert_userdetails_one(
             object:
         {
             email: $email,
             user_id: $user_id,
+            avatar_url: $avatar_url,
             username: $username}
             on_conflict: { 
                 constraint: userdetails_pkey, 

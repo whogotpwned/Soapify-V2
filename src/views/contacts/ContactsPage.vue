@@ -228,8 +228,11 @@ window.addEventListener('deleteUserWithId', (event: any) => {
 
 
 async function queriedUserExists(targetUserID: string) {
+  console.log(targetUserID);
+
   const result = await nhost.graphql.request(countNumberOfUsersWithId, {user_id: targetUserID});
 
+  console.log(result.data.userdetails_aggregate.aggregate.count);
   return result.data.userdetails_aggregate.aggregate.count > 0;
 }
 
@@ -249,6 +252,8 @@ window.addEventListener('idContactSearch', async (event: any) => {
 
     const userExists = await queriedUserExists(idToBeAdded);
 
+    console.log(userExists);
+
     if (userExists) {
 
       const getFriendshipHash = await sha256(`${store.getSessionID},${idToBeAdded}`);
@@ -259,6 +264,8 @@ window.addEventListener('idContactSearch', async (event: any) => {
             user_id: store.getSessionID,
             friendship_hash: getFriendshipHash
           });
+
+      console.log(insertContactResult);
 
       if (insertContactResult.error) {
         await presentAlert('Fehler beim Hinzufügen des Kontaktes');

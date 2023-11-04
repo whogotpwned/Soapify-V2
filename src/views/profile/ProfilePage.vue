@@ -9,7 +9,6 @@ ion-page
     ion-refresher(slot="fixed" :pull-factor="0.5" :pull-min="100" :pull-max="200" @ionRefresh="handleRefresh($event)")
       ion-refresher-content
 
-
     ion-card(class="avatar")
       ion-card-content
         ion-grid
@@ -116,6 +115,7 @@ function getPersonalEmail() {
 
 function refresh() {
   getAvatarURL();
+  console.log(avatarURL.value);
   getUsername();
   getPersonalEmail();
   getUserID();
@@ -157,6 +157,10 @@ async function logout() {
   if (error) {
     console.log(error);
   } else {
+    store.resetUsername('');
+    store.resetCurrentDialoguePartner();
+    store.resetAvatarURL();
+
     success_toast.fire({
       icon: 'success',
       title: 'Logout erfolgreich'

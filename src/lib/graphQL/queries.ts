@@ -21,9 +21,9 @@ export const getUser  = gql`
 
 export const countNumberOfUsersWithId = gql`
     query countNumberOfUsersWithIds($user_id: uuid!) {
-        userdetails_aggregate(distinct_on: id, where: {user_id: {_eq: $user_id}}) {
+        userdetails_aggregate(where: {user_id: {_eq: $user_id}}) {
             aggregate {
-                count(columns: id, distinct: true)
+                count(columns: id)
             }
         }
     }`

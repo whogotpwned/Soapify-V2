@@ -25,6 +25,7 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {error_toast, success_toast} from "@/views/toasts/messages";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {insertUser} from "@/lib/graphQL/mutations";
+import {sha256} from "@/views/contacts/methods";
 
 let email = ref('');
 let password = ref('');
@@ -84,9 +85,11 @@ async function login() {
           store.setAvatarURL(userAvatarUrl);
         }
 
+        const avatarHash = await sha256(userEmail);
 
         const insertUserResult = await nhost.graphql.request(insertUser, {
           user_id: userID,
+          avatar_url: `https://gravatar.com/avatar/${avatarHash}?r=g&default=blank`,
           username: userDisplayName,
           email: userEmail,
         });

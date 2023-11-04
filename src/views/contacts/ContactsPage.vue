@@ -58,7 +58,7 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {presentAlert, presentSuccess} from "@/views/toasts/alerts";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {countNumberOfUsersWithId, getUser, getContactsOfUserWithId, countNumberOfContactsOfUserWithId} from "@/lib/graphQL/queries";
-import {insertOneContact} from "@/lib/graphQL/mutations";
+import {insertOneContact, deleteContactOfUserWithId} from "@/lib/graphQL/mutations";
 import {sha256} from "@/views/contacts/methods";
 
 const contacts = ref([] as Array<Object>);
@@ -159,46 +159,35 @@ window.addEventListener('deleteUserWithId', (event: any) => {
     denyButtonText: `Don't save`,
     heightAuto: false
   }).then(async (result) => {
-
     if (result.isConfirmed) {
       const idToBeDeleted = event.detail.user_id;
       const contactInList = contactsContainContactWithID(idToBeDeleted);
 
       if (contactInList) {
-        getUserSession().then((result) => {
-          supabase.from('contacts').delete().match({
-            user_id: result,
-            contact: idToBeDeleted
-          }).then(async (result) => {
-            if (result.error) {
-              await presentAlert('Fehler beim Lösches des Kontakts');
-            } else {
-              await presentSuccess('Kontakt erfolgreich gelöscht')
-            }
-          }).then(() => {
-            supabase.from('chats').delete().match({
-              user_id: result,
-              contact: idToBeDeleted
-            }).then(() => {
-              supabase.from('chats').delete().match({
-                user_id: idToBeDeleted,
-                contact: result
-              }).then(async (result) => {
-                if (result.error) {
-                  await presentAlert('Fehler beim Löschen der Nachrichten');
-                }
-              });
-            });
+
+        const deleteUserWithIdResult = await nhost.graphql.request(deleteContactOfUserWithId,
+            {user_id: store.getSessionID, contact: idToBeDeleted});
+
+        if (deleteUserWithIdResult.error) {
+          error_toast.fire({
+            icon: 'error',
+            title: 'Fehler beim Löschen des Kontaktes'
           });
-        });
-        // delete element from contact list where user_id matches idToBeDeleted
-        contacts.value = contacts.value.filter((contact: any) => {
-          return contact.user_id !== idToBeDeleted;
-        });
-        // delete element from store
-        store.deleteContactInformationWithID(idToBeDeleted);
-        // delete element from active chats
-        store.deleteFromActiveChats(idToBeDeleted);
+        } else {
+          success_toast.fire({
+            icon: 'success',
+            title: 'Kontakt erfolgreich gelöscht'
+          });
+
+          // delete element from contact list where user_id matches idToBeDeleted
+          contacts.value = contacts.value.filter((contact: any) => {
+            return contact.user_id !== idToBeDeleted;
+          });
+          // delete element from store
+          store.deleteContactInformationWithID(idToBeDeleted);
+          // delete element from active chats
+          store.deleteFromActiveChats(idToBeDeleted);
+        }
       } else {
         error_toast.fire({
           icon: 'error',

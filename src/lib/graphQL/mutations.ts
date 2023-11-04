@@ -44,3 +44,16 @@ export const updateUsername = gql`
         }
     }
 `
+
+export const deleteContactOfUserWithId = gql`
+    mutation deleteContactOfUserWithId($user_id: uuid!, $contact: uuid!) {
+        delete_contacts(where: {
+            user_id: {
+                _eq: $user_id}, 
+            contact: {
+                _eq: $contact}}) {
+            returning {
+                id
+            }
+        }
+    }`

@@ -60,13 +60,26 @@ export const deleteContactOfUserWithId = gql`
 
 
 export const insertNewDialogue = gql`
-    mutation insertNewDialogue($audio: String!, $contact: uuid!, $title: String!, $speech_to_text: String!, $user_id: uuid!) {
+    mutation insertNewDialogue($audio: String!, $contact: uuid!, $title: String!, $speech_to_text: String!, $chips: [jsonb!], $user_id: uuid!) {
         insert_chats_one(object: {
             audio: $audio,
             contact: $contact,
             title: $title,
             speech_to_text: $speech_to_text,
+            chips: $chips,
             user_id: $user_id}) {
             chat_id
+        }
+    }`
+
+
+export const updateChips = gql`
+    mutation updateChips($chat_id: uuid!, $chips: [jsonb!]) {
+        update_chats(where: {
+            chat_id: {_eq: $chat_id}},
+            _set: {chips: $chips }) {
+            returning {
+                id
+            }
         }
     }`

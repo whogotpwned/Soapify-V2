@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.tags" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -73,7 +73,7 @@ import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
-import {insertNewDialogue} from "@/lib/graphQL/mutations";
+import {insertNewDialogue, updateChips} from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {counterNumberOfChatsBetweenIDAndContact,
   getDialoguesBetweenIDAndContact} from "@/lib/graphQL/queries";
@@ -198,19 +198,26 @@ window.addEventListener('search', (event: any) => {
   searchbarPlaceholder.value = `chipSuche:[${event.detail.chipSuche}]`;
 });
 
-window.addEventListener('addChip', (event: any) => {
+window.addEventListener('addChip',async (event: any) => {
   // add the tag to the json object of the respective audio element matching the id
   const tagID = uuidv4();
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
-    if (audio.id === event.detail.id) {
+
+    if (audio.chat_id === event.detail.id) {
       // extend object by tag
-      audio.tags.push({id: tagID, value: event.detail.tag});
+      audio["chips"].push({id: tagID, value: event.detail.tag});
     }
     return audio;
   });
 
   //TODO: add to nhost
+  const updateChipResult = await nhost.graphql.request(updateChips, {
+    chat_id: event.detail.id,
 
+
+
+
+  });
 });
 
 window.addEventListener('openDialogue', (event: any) => {
@@ -332,6 +339,7 @@ async function stopRecording() {
     contact: store.getCurrentDialoguePartner.user_id,
     title: title,
     speech_to_text: result.value,
+    chips: [],
     user_id: store.getSessionID,
   });
 
@@ -344,7 +352,7 @@ async function stopRecording() {
     record: audioBase64,
     title: title,
     spokenText: result.value,
-    tags: []
+    chips: []
   }
 
   audiosMerged.value.push(newAudioElement);

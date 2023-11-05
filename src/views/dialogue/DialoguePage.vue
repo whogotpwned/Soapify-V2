@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.tags" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.tags" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -75,6 +75,8 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {insertNewDialogue} from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import {counterNumberOfChatsBetweenIDAndContact,
+  getDialoguesBetweenIDAndContact} from "@/lib/graphQL/queries";
 
 const {
   result,
@@ -107,66 +109,51 @@ const stopLoading = async () => {
   await loadingController.dismiss();
 };
 
+onIonViewWillEnter(() => {
+  refreshAllChats();
+});
 
+refreshAllChats();
 
 async function refreshAllChats() {
-  if (!store.getLastActiveChatWasWithID) {
-    return
+
+  const numberOfChatsBetweenIDAndContactResult = await nhost.graphql.request(counterNumberOfChatsBetweenIDAndContact, {
+    user_id: store.getSessionID,
+    contact: store.getCurrentDialoguePartner.user_id
+  });
+
+  const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count;
+  const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues.length;
+
+
+  if (numberOfChatsBetweenIDAndContactStore < numberOfChatsBetweenIDAndContactNhost) {
+    console.log("Loading from Nhost");
+
+    const dialoguesBetweenIDAndContactResult = await nhost.graphql.request(getDialoguesBetweenIDAndContact, {
+      user_id: store.getSessionID,
+      contact: store.getCurrentDialoguePartner.user_id
+    });
+
+    const dialogues = dialoguesBetweenIDAndContactResult.data.chats;
+
+    store.setDialoguesOfCurrentDialoguePartner(dialogues);
+    audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
+  } else {
+    console.log("Loading from Store");
+    audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
-  await showLoading();
-  audiosMerged.value = [];
 
-  let dialog_partner_id = currentDialoguePartner.value.user_id;
-  store.updateCurrentDialoguePartnerAttribute('user_id', currentDialoguePartner.value.user_id);
+  // sort audiosMerged.value by created_at in descending order
+  audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  })
 
-  let avatarURLSender = await store.getAvatarUrlFromContactInformationForID(dialog_partner_id);
-  store.updateCurrentDialoguePartnerAttribute('avatarUrl', avatarURLSender)
-  currentDialoguePartner.value.avatarUrl = avatarURLSender;
-
-  if (currentDialoguePartner && dialog_partner_id) {
-    // get all chats and relevant details sent by me
-    getAvatarForID(store.getSessionID).then((senderAvatar) => {
-      getChatsOfUserWithIDSentToUserWithID(store.getSessionID, dialog_partner_id).then((chats) => {
-        chats.forEach((chat) => {
-          audiosMerged.value.push({
-            id: chat.chat_id,
-            created_at: chat.created_at,
-            sentByMe: true,
-            senderAvatar: senderAvatar,
-            record: chat.audio,
-            title: chat.title,
-            spokenText: chat.speech_to_text,
-            tags: chat.chips
-          })
-        });
-      });
-    })
-
-    if (dialog_partner_id) {
-      // get all chats and relevant details received by me
-      getAvatarForID(dialog_partner_id).then((senderAvatar) => {
-        if (store.getSessionID != dialog_partner_id) {
-          getChatsOfUserWithIDSentToUserWithID(dialog_partner_id, store.getSessionID).then((chats) => {
-            chats.forEach((chat) => {
-              audiosMerged.value.push({
-                id: chat.chat_id,
-                created_at: chat.created_at,
-                senderAvatar: senderAvatar,
-                sentByMe: false,
-                record: chat.audio,
-                title: chat.title,
-                spokenText: chat.speech_to_text,
-                tags: chat.chips
-              })
-            });
-          });
-        }
-      });
-    }
-  }
-  setTimeout(async () => {
-    await stopLoading();
-  }, 500);
+  // add another key to each audio element to indicate whether it was sent by me or not if user_id matches
+  // store.getSessionID it is sent by me
+  audiosMerged.value = audiosMerged.value.map((audio: any) => {
+    audio.sentByMe = audio.user_id === store.getSessionID;
+    return audio;
+  });
 }
 
 function getAudiosMerged() {
@@ -222,46 +209,17 @@ window.addEventListener('addChip', (event: any) => {
     return audio;
   });
 
-  getUserSession().then((current_user_id) => {
-    let from = current_user_id;
-    let to = currentDialoguePartner.value.user_id;
+  //TODO: add to nhost
 
-    if (!event.detail.isSender) {
-      from = currentDialoguePartner.value.user_id;
-      to = current_user_id;
-    }
-
-    getChipsOfSpecificDialogBetweenUserAndContact(from, to, event.detail.id).then(async (chips) => {
-      let currentChips = chips[0].chips;
-      let newChip = [{id: tagID, value: event.detail.tag}];
-      let updatedChips = currentChips.concat(newChip);
-
-      // delete elements from updatedChips where id has duplicate
-      updatedChips = updatedChips.filter((item: any, index: any, self: any) =>
-              index === self.findIndex((t: any) => (
-                  t.id === item.id
-              ))
-      )
-
-      await supabase
-          .from('chats')
-          .update({chips: updatedChips})
-          .match({'user_id': from, 'contact': to, 'chat_id': event.detail.id}).then((result) => {
-            if (!result.error) {
-              console.log("Tag erfolgreich hinzugefügt");
-            }
-          });
-    })
-  });
 });
 
 window.addEventListener('openDialogue', (event: any) => {
-  // currentDialoguePartner.value = {
-  //   user: event.detail.user,
-  //   user_id: event.detail.user_id,
-  //   email: event.detail.email,
-  //   avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
-  // };
+  currentDialoguePartner.value = {
+    user: event.detail.user,
+    user_id: event.detail.user_id,
+    email: event.detail.email,
+    avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
+  };
 });
 
 window.addEventListener('deleteTag', (event: any) => {
@@ -271,22 +229,8 @@ window.addEventListener('deleteTag', (event: any) => {
       audio.tags = audio.tags.filter((tag: any) => {
         return tag.id !== event.detail.tag.id;
       });
-      getUserSession().then((current_user_id) => {
-        supabase
-            .from('chats')
-            .update({
-              chips: audio.tags
-            })
-            .match({
-              'user_id': current_user_id,
-              'contact': currentDialoguePartner.value.user_id,
-              'chat_id': event.detail.id
-            }).then((result) => {
-          if (!result.error) {
-            console.log("Tag erfolgreich gelöscht");
-          }
-        });
-      });
+      //TODO: delete in nhost
+
     }
     return audio;
   });
@@ -304,18 +248,8 @@ window.addEventListener('deleteElement', (event: any) => {
           return audio.id !== event.detail.id;
         });
 
-        supabase
-            .from('chats')
-            .delete()
-            .match({
-              'user_id': current_user_id,
-              'chat_id': event.detail.id
-            }).then((result) => {
+        //TODO: delete in nhost
 
-          if (!result.error) {
-            console.log("Element erfolgreich gelöscht");
-          }
-        });
       } else {
         error_toast.fire({
           icon: 'error',
@@ -355,20 +289,7 @@ function deleteMarkedCheckboxes() {
           return !audioElementsToBeDeleted.value.includes(audio.id)
         });
 
-        getUserSession().then((current_user_id) => {
-          supabase
-              .from('chats')
-              .delete()
-              .in('chat_id', audioElementsToBeDeleted.value)
-              .eq('user_id', current_user_id)
-              .then((result) => {
-                audioElementsToBeDeleted.value = []
-                if (!result.error) {
-                  console.log("Element erfolgreich gelöscht");
-                }
-              });
-
-        })
+        //TODO: delete in nhost
 
       } catch (e) {
         Swal.fire({
@@ -419,7 +340,6 @@ async function stopRecording() {
   const newAudioElement = {
     id: generatedChatId,
     created_at: getCurrentDateTimestamp(),
-    sentByMe: true,
     senderAvatar: store.getAvatarURL,
     record: audioBase64,
     title: title,
@@ -427,7 +347,6 @@ async function stopRecording() {
     tags: []
   }
 
-  // TODO: Diese Variable soll im Laufe der Zeit wegfallen, es soll nur noch über den Store gearbeitet werden
   audiosMerged.value.push(newAudioElement);
 
   store.addDialogueToCurrentDialoguePartner(newAudioElement);

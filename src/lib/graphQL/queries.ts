@@ -45,3 +45,38 @@ export const countNumberOfContactsOfUserWithId = gql`
         }
     }
 `
+
+export const counterNumberOfChatsBetweenIDAndContact = gql`
+    query counterNumberOfChatsBetweenIDAndContact($user_id: uuid!, $contact: uuid!){
+        chats_aggregate(where: {
+            user_id: {
+                _eq: $user_id
+            }, 
+            contact: {
+                _eq: $contact
+            }}) {
+            aggregate {
+                count(columns: id, distinct: true)
+            }
+        }
+    }`
+
+export const getDialoguesBetweenIDAndContact = gql`
+    query getDialoguesBetweenIDAndContact($user_id: uuid!, $contact: uuid!){
+        chats(where: {
+            user_id: {
+                _eq: $user_id
+            },
+            contact: {
+                _eq: $contact
+            }}) {
+            user_id
+            title
+            speech_to_text
+            created_at
+            contact
+            chips
+            chat_id
+            audio
+        }
+    }`

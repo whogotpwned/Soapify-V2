@@ -65,6 +65,8 @@ export const userSessionStore = defineStore({
             this.currentDialoguePartner[attribute] = value;
         }, addDialogueToCurrentDialoguePartner(dialogue: object) {
             this.currentDialoguePartner["dialogues"].push(dialogue);
+        }, setDialoguesOfCurrentDialoguePartner(dialogues: object) {
+            this.currentDialoguePartner["dialogues"] = dialogues;
         }
 
     }, persist: true,

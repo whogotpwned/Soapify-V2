@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -116,6 +116,10 @@ onIonViewWillEnter(() => {
 refreshAllChats();
 
 async function refreshAllChats() {
+
+  if(!store.currentDialoguePartner.user_id) {
+    return;
+  }
 
   const numberOfChatsBetweenIDAndContactResult = await nhost.graphql.request(counterNumberOfChatsBetweenIDAndContact, {
     user_id: store.getSessionID,
@@ -203,7 +207,11 @@ window.addEventListener('addChip',async (event: any) => {
   const tagID = uuidv4();
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
 
+    console.log(audio.chat_id);
+    console.log(event.detail.id);
+
     if (audio.chat_id === event.detail.id) {
+      console.log("lkjlkjkl")
       // extend object by tag
       audio["chips"].push({id: tagID, value: event.detail.tag});
     }

@@ -94,7 +94,9 @@ async function refreshAllContactsFromNhost() {
       email: userDetailsOfUserWithID.data.userdetails[0].email
     }
 
-    store.addToContactInformation(contactDetails);
+    if (!store.contactsContainUserWithID(contactDetails.user_id)) {
+      store.addToContactInformation(contactDetails);
+    }
 
     contacts.value.push(contactDetails);
   }
@@ -118,8 +120,10 @@ async function loadAllContacts()  {
     const numberOfContactsOfUser = numberOfContactsForUserWithIdResult.data.contacts_aggregate.aggregate.count;
 
     if (store.getContactInformation.length < numberOfContactsOfUser) {
+      console.log("From Nhost")
       await refreshAllContactsFromNhost();
     } else {
+      console.log("From Store");
       await refreshAllContactsFromStore();
     }
   } catch (e) {

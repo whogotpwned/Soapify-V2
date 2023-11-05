@@ -3,7 +3,8 @@ import {getContactsOfUserWithId} from "@/lib/supabase/supabaseMethods";
 
 export const userSessionStore = defineStore({
     id: 'soapify', state: () => ({
-        sessionID: '', email: '', avatarURL: '', username: '', contactInformation: [], activeChats: [], lastActiveChatWasWithID: '', currentDialoguePartner: {}
+        sessionID: '', email: '', avatarURL: '', username: '', contactInformation: [], activeChats: [], lastActiveChatWasWithID: '',
+        currentDialoguePartner: {"dialogues": []}
     }), getters: {
         getSessionID: (state) => state.sessionID, getEmail: (state) => state.email, getAvatarURL: (state) => state.avatarURL, getUsername: (state) => state.username, getContactInformation: (state) => state.contactInformation, getActiveChats: (state) => state.activeChats, getLastActiveChatWasWithID: (state) => state.lastActiveChatWasWithID, getCurrentDialoguePartner: (state) => state.currentDialoguePartner
 
@@ -47,7 +48,6 @@ export const userSessionStore = defineStore({
             if (this.lastActiveChatWasWithID === toBeDeletedDialoguePartnerID) {
                 this.resetLastActiveChatWasWithID()
             }
-
         }, activeChatsContainChatWithID(targetID: string) {
             return this.activeChats.filter(e => e.user_id === targetID).length > 0
         }, setLastActiveChatWasWithID(lastActiveChatWasWithID: string) {
@@ -63,6 +63,8 @@ export const userSessionStore = defineStore({
             this.currentDialoguePartner = {};
         }, updateCurrentDialoguePartnerAttribute(attribute: string, value: string) {
             this.currentDialoguePartner[attribute] = value;
+        }, addDialogueToCurrentDialoguePartner(dialogue: object) {
+            this.currentDialoguePartner["dialogues"].push(dialogue);
         }
 
     }, persist: true,

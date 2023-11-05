@@ -406,7 +406,6 @@ async function stopRecording() {
   const title = 'Recording: ' + getCurrentDateTimestamp();
   isRecording.value = false;
 
-
   const insertNewDialogueResult = await nhost.graphql.request(insertNewDialogue, {
     audio: audioBase64,
     contact: store.getCurrentDialoguePartner.user_id,
@@ -416,47 +415,22 @@ async function stopRecording() {
   });
 
   const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
-  
 
-  // getUserSession().then(async (session) => {
-  //   // declare variable for target id which is currentDialoguePartner.value.user_id if exists and session else
-  //   let target_id = '';
-  //   let avatarID = '';
-  //
-  //   if (currentDialoguePartner.value.user_id) {
-  //     target_id = currentDialoguePartner.value.user_id;
-  //     avatarID = session;
-  //   } else {
-  //     target_id = session;
-  //     avatarID = currentDialoguePartner.value.user_id;
-  //   }
-  //
-  //   const senderAvatar = await getAvatarForID(avatarID);
-  //
-  //   audiosMerged.value.push({
-  //     id: chat_id,
-  //     record: audioBase64,
-  //     senderAvatar: senderAvatar,
-  //     sentByMe: true,
-  //     title: title,
-  //     spokenText: result.value,
-  //     tags: []
-  //   });
-  //
-  //   supabase.from('chats').insert([
-  //     {
-  //       user_id: session,
-  //       contact: target_id,
-  //       audio: audioBase64,
-  //       title: title,
-  //       chips: [],
-  //       speech_to_text: result.value,
-  //       chat_id: chat_id
-  //     }
-  //   ]).then((result) => {
-  //     console.log(result);
-  //   })
-  // });
+  const newAudioElement = {
+    id: generatedChatId,
+    created_at: getCurrentDateTimestamp(),
+    sentByMe: true,
+    senderAvatar: store.getAvatarURL,
+    record: audioBase64,
+    title: title,
+    spokenText: result.value,
+    tags: []
+  }
+
+  // TODO: Diese Variable soll im Laufe der Zeit wegfallen, es soll nur noch über den Store gearbeitet werden
+  audiosMerged.value.push(newAudioElement);
+
+  store.addDialogueToCurrentDialoguePartner(newAudioElement);
 }
 
 function clearSearch() {

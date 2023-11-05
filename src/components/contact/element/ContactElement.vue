@@ -65,14 +65,17 @@ function openDialogue(user, user_id, email) {
     const lastAccessTimestamp = getCurrentDateTimestamp();
 
     if(!store.activeChatsContainChatWithID(user_id)) {
-      store.addToActiveChats({
+      const currentDialoguePartner = {
         user: user,
         user_id: user_id,
         email: email,
         avatarUrl: avatarUrlForID,
         lastAccessTimestamp: lastAccessTimestamp,
-      })
+      }
+      store.addToActiveChats(currentDialoguePartner)
+      store.setCurrentDialoguePartner(currentDialoguePartner)
     } else {
+      console.log("Doch")
       store.updateTimestampOfActiveChatWithID(user_id, lastAccessTimestamp);
     }
     store.setLastActiveChatWasWithID(user_id);

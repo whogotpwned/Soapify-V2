@@ -10,16 +10,11 @@ ion-page
         ion-toolbar
           ion-title(size="large") Contacts
 
-      div(v-if="contacts.length == 0" id="alone")
-        div(align="center")
-          h1(id="forever-alone-head") Du hast 0 Freunde auf Soapify
-        iframe.giphy-embed(src='/public/gifs/forever_alone.gif' width='480' height='324' frameborder='0' allowfullscreen='')
 
-      div(v-else)
-        ion-list(lines="full")
-          ion-item(v-for="contact in contacts" :key="contact")
-            ion-label
-              ContactElement(:avatar="contact.avatarSrc" :email="contact.email" :user="contact.username" :user_id="contact.user_id")
+      ion-list(lines="full")
+        ion-item(v-for="contact in contacts" :key="contact")
+          ion-label
+            ContactElement(:avatar="contact.avatarSrc" :email="contact.email" :user="contact.username" :user_id="contact.user_id")
 
   ion-footer
     ion-toolbar
@@ -98,6 +93,8 @@ async function refreshAllContactsFromNhost() {
       user_id: userDetailsOfUserWithID.data.userdetails[0].user_id,
       email: userDetailsOfUserWithID.data.userdetails[0].email
     }
+
+    store.addToContactInformation(contactDetails);
 
     contacts.value.push(contactDetails);
   }

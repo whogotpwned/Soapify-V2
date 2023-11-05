@@ -106,17 +106,6 @@ const stopLoading = async () => {
 };
 
 
-onIonViewWillEnter(() => {
-  refreshAllChats();
-})
-
-getUserSession().then((session_id) => {
-  store.setSessionID(session_id);
-});
-
-if (store.getLastActiveChatWasWithID) {
-  currentDialoguePartner.value.user_id = store.getLastActiveChatWasWithID;
-}
 
 async function refreshAllChats() {
   if (!store.getLastActiveChatWasWithID) {
@@ -209,28 +198,6 @@ const openModal = async () => {
   modal.present();
 };
 
-// TODO: @ay: this is the default way of listening to changes in db
-supabase.channel('table_db_changes')
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'chats',
-    }, (payload) => {
-
-      if (payload.eventType === 'INSERT') {
-        // here someone sent me a message ...
-        if (payload.new.contact == store.getSessionID) {
-          audiosMerged.value.push(payload.new);
-          audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          })
-        }
-      } else if (payload.eventType === 'DELETE') {
-        console.log("DELETE ....");
-      }
-
-    }).subscribe();
-
 window.addEventListener('search', (event: any) => {
   searchTerm.value = event.detail.chipSuche;
   /* only keep those cards which contain a tag matching chipSuche */
@@ -287,12 +254,12 @@ window.addEventListener('addChip', (event: any) => {
 });
 
 window.addEventListener('openDialogue', (event: any) => {
-  currentDialoguePartner.value = {
-    user: event.detail.user,
-    user_id: event.detail.user_id,
-    email: event.detail.email,
-    avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
-  };
+  // currentDialoguePartner.value = {
+  //   user: event.detail.user,
+  //   user_id: event.detail.user_id,
+  //   email: event.detail.email,
+  //   avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
+  // };
 });
 
 window.addEventListener('deleteTag', (event: any) => {

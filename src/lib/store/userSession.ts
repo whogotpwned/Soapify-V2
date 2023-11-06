@@ -67,6 +67,9 @@ export const userSessionStore = defineStore({
             this.currentDialoguePartner["dialogues"].push(dialogue);
         }, setDialoguesOfCurrentDialoguePartner(dialogues: object) {
             this.currentDialoguePartner["dialogues"] = dialogues;
+        }, updateDialogueTitleOfDialogueWithId(chatID: string, newTitle: string) {
+            const objIndex = this.currentDialoguePartner["dialogues"].findIndex((obj => obj["chat_id"] == chatID));
+            this.currentDialoguePartner["dialogues"][objIndex]["title"] = newTitle
         }
 
     }, persist: true,

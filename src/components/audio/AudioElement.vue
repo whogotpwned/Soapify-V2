@@ -154,11 +154,9 @@ async function changeTitle(id: string) {
     user_id: store.getSessionID,
     title: localTitle.value
   })
+  store.updateDialogueTitleOfDialogueWithId(id, localTitle.value);
 }
 
-function foobar() {
-  console.log("YOOOO")
-}
 function deleteElement(id: string) {
   Swal.fire({
     title: 'Element wirklich unwiderruflich löschen?',

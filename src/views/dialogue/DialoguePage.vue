@@ -290,6 +290,8 @@ window.addEventListener('deleteElement', (event: any) => {
 
         //TODO: delete in nhost
 
+
+
       } else {
         error_toast.fire({
           icon: 'error',

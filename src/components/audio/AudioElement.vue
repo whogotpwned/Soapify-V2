@@ -96,10 +96,12 @@ function addChip(id: string) {
       specificChip.value = '';
     } else {
       if (specificChip.value === ' ') {
+        console.log("Leer")
         specificChip.value = '';
         return;
       }
-      chips.value.push({id: props.id, value: specificChip.value})
+
+      chips.value.push({value: specificChip.value})
 
       /* send tag to parent component  */
       const event = new CustomEvent('addChip', {

@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -123,14 +123,13 @@ async function refreshAllChats() {
     return;
   }
 
-
   const numberOfChatsBetweenIDAndContactResult = await nhost.graphql.request(counterNumberOfChatsBetweenIDAndContact, {
     user_id: store.getSessionID,
     contact: store.getCurrentDialoguePartner.user_id
   });
 
   const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data ? numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count : 0;
-  const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues.length;
+  const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues ? store.getCurrentDialoguePartner.dialogues.length : 0;
 
   if (numberOfChatsBetweenIDAndContactStore < numberOfChatsBetweenIDAndContactNhost) {
     console.log("Loading from Nhost");
@@ -158,6 +157,7 @@ async function refreshAllChats() {
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   } else {
     console.log("Loading from Store");
+
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
 
@@ -234,10 +234,12 @@ window.addEventListener('addChip',async (event: any) => {
     chips: [...chipsOfChatWithId, insertChipsResultId]
   });
 
+
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
-    if (audio.id === event.detail.id) {
+
+    if (audio.chat_id === event.detail.id) {
       // extend object by tag
-      audio["chips"].push({chip_id: insertChipsResultId, value: event.detail.tag});
+      audio["chips"].push(event.detail.tag);
     }
     return audio;
   });
@@ -368,8 +370,10 @@ async function stopRecording() {
 
   const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
 
+  console.log(generatedChatId);
+
   const newAudioElement = {
-    id: generatedChatId,
+    chat_id: generatedChatId,
     created_at: getCurrentDateTimestamp(),
     senderAvatar: store.getAvatarURL,
     record: audioBase64,

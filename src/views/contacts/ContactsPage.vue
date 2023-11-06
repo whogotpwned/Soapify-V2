@@ -59,10 +59,6 @@ import {sha256} from "@/views/contacts/methods";
 const contacts = ref([] as Array<Object>);
 const store = userSessionStore();
 
-onIonViewDidEnter(() => {
-  loadAllContacts();
-});
-
 loadAllContacts();
 
 const handleRefresh = (event: CustomEvent) => {
@@ -80,8 +76,12 @@ async function refreshAllContactsFromNhost() {
 
   const numberOfContacts = contactsSearchResult.data.contacts.length;
 
+  console.log("Number of Contact: ")
+  console.log(numberOfContacts)
+
   // loop over all contacts
   for (let i = 0; i < numberOfContacts; i++) {
+    console.log(i);
 
     const contactId = contactsSearchResult.data.contacts[i].contact;
 

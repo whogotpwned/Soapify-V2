@@ -88,11 +88,12 @@ async function refreshAllContactsFromNhost() {
     const userDetailsOfUserWithID = await nhost.graphql.request(getUser, {user_id: contactId});
 
     const contactDetails = {
-      username: userDetailsOfUserWithID.data.userdetails[0].username,
-      avatarSrc: userDetailsOfUserWithID.data.userdetails[0].avatar_url,
-      user_id: userDetailsOfUserWithID.data.userdetails[0].user_id,
-      email: userDetailsOfUserWithID.data.userdetails[0].email
+      username: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].username : "",
+      avatarSrc: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].avatar_url : "",
+      user_id: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].user_id : "",
+      email: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].email : ""
     }
+
 
     if (!store.contactsContainUserWithID(contactDetails.user_id)) {
       store.addToContactInformation(contactDetails);
@@ -127,6 +128,7 @@ async function loadAllContacts()  {
       await refreshAllContactsFromStore();
     }
   } catch (e) {
+    console.log(e)
     error_toast.fire({
       icon: 'error',
       title: 'Fehler beim Laden der Kontakte'

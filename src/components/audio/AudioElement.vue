@@ -99,7 +99,7 @@ function addChip(id: string) {
         specificChip.value = '';
         return;
       }
-      chips.value.push({id: uuidv4(), value: specificChip.value})
+      chips.value.push({id: props.id, value: specificChip.value})
 
       /* send tag to parent component  */
       const event = new CustomEvent('addChip', {

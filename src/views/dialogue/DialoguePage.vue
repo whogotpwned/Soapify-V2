@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -73,10 +73,10 @@ import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
-import {insertNewDialogue, updateChips} from "@/lib/graphQL/mutations";
+import {insertChipInChipsTable, insertNewDialogue, updateChipsInChatsTable} from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {counterNumberOfChatsBetweenIDAndContact,
-  getDialoguesBetweenIDAndContact} from "@/lib/graphQL/queries";
+  getDialoguesBetweenIDAndContact, getChipsOfChatId} from "@/lib/graphQL/queries";
 
 const {
   result,
@@ -126,7 +126,7 @@ async function refreshAllChats() {
     contact: store.getCurrentDialoguePartner.user_id
   });
 
-  const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count;
+  const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data ? numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count : 0;
   const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues.length;
 
 
@@ -207,25 +207,32 @@ window.addEventListener('addChip',async (event: any) => {
   const tagID = uuidv4();
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
 
-    console.log(audio.chat_id);
-    console.log(event.detail.id);
-
     if (audio.chat_id === event.detail.id) {
-      console.log("lkjlkjkl")
       // extend object by tag
       audio["chips"].push({id: tagID, value: event.detail.tag});
     }
     return audio;
   });
 
-  //TODO: add to nhost
-  const updateChipResult = await nhost.graphql.request(updateChips, {
+  const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
+    chips: [{chip: event.detail.tag}]
+  })
+
+  const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
+
+
+  const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
     chat_id: event.detail.id,
-
-
-
-
   });
+
+  const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
+  
+  const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
+    chat_id: event.detail.id,
+    chips: [...chipsOfChatWithId, insertChipsResultId]
+  });
+
+
 });
 
 window.addEventListener('openDialogue', (event: any) => {

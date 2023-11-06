@@ -1,10 +1,9 @@
-
 import {gql} from "graphql-request";
 
-export const getUser  = gql`
+export const getUser = gql`
     query getUser($user_id: uuid!) {
         userdetails(
-            limit: 1, 
+            limit: 1,
             where: {
                 user_id: {
                     _eq: $user_id
@@ -51,7 +50,7 @@ export const counterNumberOfChatsBetweenIDAndContact = gql`
         chats_aggregate(where: {
             user_id: {
                 _eq: $user_id
-            }, 
+            },
             contact: {
                 _eq: $contact
             }}) {
@@ -78,5 +77,13 @@ export const getDialoguesBetweenIDAndContact = gql`
             chips
             chat_id
             audio
+        }
+    }`
+
+
+export const getChipsOfChatId = gql`
+    query getChipsOfChatId($chat_id: uuid!){
+        chats(where: {chat_id: {_eq: $chat_id}}) {
+            chips
         }
     }`

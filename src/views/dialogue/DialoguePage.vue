@@ -203,17 +203,6 @@ window.addEventListener('search', (event: any) => {
 });
 
 window.addEventListener('addChip',async (event: any) => {
-  // add the tag to the json object of the respective audio element matching the id
-  const tagID = uuidv4();
-  audiosMerged.value = audiosMerged.value.map((audio: any) => {
-
-    if (audio.chat_id === event.detail.id) {
-      // extend object by tag
-      audio["chips"].push({id: tagID, value: event.detail.tag});
-    }
-    return audio;
-  });
-
   const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
     chips: [{chip: event.detail.tag}]
   })
@@ -226,13 +215,19 @@ window.addEventListener('addChip',async (event: any) => {
   });
 
   const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
-  
+
   const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
     chat_id: event.detail.id,
     chips: [...chipsOfChatWithId, insertChipsResultId]
   });
 
-
+  audiosMerged.value = audiosMerged.value.map((audio: any) => {
+    if (audio.id === event.detail.id) {
+      // extend object by tag
+      audio["chips"].push({chip_id: insertChipsResultId, value: event.detail.tag});
+    }
+    return audio;
+  });
 });
 
 window.addEventListener('openDialogue', (event: any) => {

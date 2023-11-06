@@ -87,3 +87,11 @@ export const getChipsOfChatId = gql`
             chips
         }
     }`
+
+
+export const getChipsWithId = gql`
+    query getChipsWithId($ids: [Int!]!) {
+        chips(where: {id: {_in: $ids}}) {
+            chip
+        }
+    }`

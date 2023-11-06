@@ -75,8 +75,10 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {insertChipInChipsTable, insertNewDialogue, updateChipsInChatsTable} from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
-import {counterNumberOfChatsBetweenIDAndContact,
-  getDialoguesBetweenIDAndContact, getChipsOfChatId} from "@/lib/graphQL/queries";
+import {
+  counterNumberOfChatsBetweenIDAndContact,
+  getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
+} from "@/lib/graphQL/queries";
 
 const {
   result,
@@ -121,6 +123,7 @@ async function refreshAllChats() {
     return;
   }
 
+
   const numberOfChatsBetweenIDAndContactResult = await nhost.graphql.request(counterNumberOfChatsBetweenIDAndContact, {
     user_id: store.getSessionID,
     contact: store.getCurrentDialoguePartner.user_id
@@ -128,7 +131,6 @@ async function refreshAllChats() {
 
   const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data ? numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count : 0;
   const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues.length;
-
 
   if (numberOfChatsBetweenIDAndContactStore < numberOfChatsBetweenIDAndContactNhost) {
     console.log("Loading from Nhost");
@@ -138,7 +140,19 @@ async function refreshAllChats() {
       contact: store.getCurrentDialoguePartner.user_id
     });
 
-    const dialogues = dialoguesBetweenIDAndContactResult.data.chats;
+    let dialogues = dialoguesBetweenIDAndContactResult.data.chats;
+
+    for (let i = 0; i < dialogues.length; i++) {
+      const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
+        ids: dialogues[i].chips
+      });
+
+      dialogues[i].chips = [];
+
+      chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
+        dialogues[i].chips.push(chipElement.chip);
+      });
+    }
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
@@ -149,7 +163,7 @@ async function refreshAllChats() {
 
   // sort audiosMerged.value by created_at in descending order
   audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
   })
 
   // add another key to each audio element to indicate whether it was sent by me or not if user_id matches
@@ -208,7 +222,6 @@ window.addEventListener('addChip',async (event: any) => {
   })
 
   const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
-
 
   const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
     chat_id: event.detail.id,
@@ -361,6 +374,7 @@ async function stopRecording() {
     senderAvatar: store.getAvatarURL,
     record: audioBase64,
     title: title,
+    sentByMe: true,
     spokenText: result.value,
     chips: []
   }

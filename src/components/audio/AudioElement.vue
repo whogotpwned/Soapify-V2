@@ -29,7 +29,7 @@ div(id="wrapper")
                   input(v-model="specificChip" @keyup.space="addChip(id)")
 
                 ion-item(v-for="tag in aTags" id="audioTags")
-                  ion-chip(color="tertiary" @click="deleteChip(id, tag)") {{ tag.value }}
+                  ion-chip(color="tertiary" @click="deleteChip(id, tag)") {{ tag }}
 
       ion-card-content
         div(id="audio-element-with-spoken-text")

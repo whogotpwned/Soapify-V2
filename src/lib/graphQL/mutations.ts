@@ -94,8 +94,9 @@ export const updateChipsInChatsTable = gql`
 
 export const updateTitleInChatsTable = gql `
 mutation updateTitleInChatsTable($chat_id: uuid!, $user_id: uuid!, $title: String!) {
-    update_chats(where: {chat_id: {_eq: $chat_id}, _and: {}, user_id: {_eq: $user_id}}, _set: {title: $title}) {
+    update_chats(where: {chat_id: {_eq: $chat_id}, _and: {user_id: {_eq: $user_id}}}, _set: {title: $title}) {
         returning {
+            id
             title
         }
     }

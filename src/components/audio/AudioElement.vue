@@ -25,7 +25,7 @@ div(id="wrapper")
             div(slot="content" class="ion-padding")
               ion-text
                 div(id="titleAndTags")
-                  ion-input(label-placement='floating' :value="localTitle" @keyup.enter="foobar")
+                  ion-input(label-placement='floating' v-model="localTitle" :value="localTitle" @keyup.enter="changeTitle(id)")
                     div(slot='label')
                       ion-text(color='danger') Titel
 
@@ -100,7 +100,6 @@ function addChip(id: string) {
       specificChip.value = '';
     } else {
       if (specificChip.value === ' ') {
-        console.log("Leer")
         specificChip.value = '';
         return;
       }
@@ -150,15 +149,11 @@ function deleteChip(id: any, chip: any) {
 }
 
 async function changeTitle(id: string) {
-
-  console.log("hello")
   const updateTitleInChatsTableResult = await nhost.graphql.request(updateTitleInChatsTable, {
-    $chat_id : id,
-    $user_id: store.getSessionID,
-    $title: localTitle.value
+    chat_id: id,
+    user_id: store.getSessionID,
+    title: localTitle.value
   })
-
-  console.log(updateTitleInChatsTableResult)
 }
 
 function foobar() {

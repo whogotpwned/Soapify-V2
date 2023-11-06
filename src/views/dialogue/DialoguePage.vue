@@ -66,9 +66,12 @@ import {
   messageSentByMe
 } from "@/lib/supabase/supabaseMethods";
 import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
-import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController} from '@ionic/vue';
+import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
+        IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter } from '@ionic/vue';
+
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import AudioElement from "@/components/audio/AudioElement.vue";
+
 import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";

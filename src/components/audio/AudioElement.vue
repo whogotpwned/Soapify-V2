@@ -20,12 +20,15 @@ div(id="wrapper")
           ion-accordion(value="first")
             ion-item(slot="header" color="light") Details
 
+
+
             div(slot="content" class="ion-padding")
               ion-text
                 div(id="titleAndTags")
-                  ion-card-subtitle
-                    ion-text(color="danger") Titel:
-                    input(v-model="localTitle" @keyup.enter="changeTitle")
+                  ion-input(label-placement='floating' :value="localTitle" @keyup.enter="foobar")
+                    div(slot='label')
+                      ion-text(color='danger') Titel
+
                   input(v-model="specificChip" @keyup.space="addChip(id)")
 
                 ion-item(v-for="chip in aChips" id="audioChip")
@@ -48,14 +51,18 @@ div(id="wrapper")
 
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel} from '@ionic/vue';
+import {IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
+        IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput} from '@ionic/vue';
+
 import {heart, trashBinOutline} from 'ionicons/icons';
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
+import {updateTitleInChatsTable} from "@/lib/graphQL/mutations";
+
 import Swal from 'sweetalert2';
 import copy from 'copy-to-clipboard';
-import {checkFileExists, getUserSession} from "@/lib/supabase/supabaseMethods";
-import {supabase} from "@/lib/supabase/supabaseClient";
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import {userSessionStore} from "@/lib/store/userSession";
 
 const props = defineProps({
   path: String,
@@ -67,8 +74,9 @@ const props = defineProps({
   isSender: Boolean
 });
 
-const chips = ref([]);
+const store = userSessionStore();
 
+const chips = ref([]);
 let specificChip = ref('');
 let localTitle = ref(props.title);
 let isChecked = ref(false);
@@ -141,20 +149,21 @@ function deleteChip(id: any, chip: any) {
 
 }
 
-async function changeTitle() {
+async function changeTitle(id: string) {
 
-  getUserSession().then((current_user_id) => {
-    supabase
-        .from('chats')
-        .update({title: localTitle.value})
-        .match({'user_id': current_user_id, 'chat_id': props.id}).then((result) => {
-      if (!result.error) {
-        console.log("Titel erfolgreich geändert");
-      }
-    })
+  console.log("hello")
+  const updateTitleInChatsTableResult = await nhost.graphql.request(updateTitleInChatsTable, {
+    $chat_id : id,
+    $user_id: store.getSessionID,
+    $title: localTitle.value
   })
+
+  console.log(updateTitleInChatsTableResult)
 }
 
+function foobar() {
+  console.log("YOOOO")
+}
 function deleteElement(id: string) {
   Swal.fire({
     title: 'Element wirklich unwiderruflich löschen?',

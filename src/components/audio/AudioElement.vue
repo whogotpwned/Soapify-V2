@@ -28,8 +28,8 @@ div(id="wrapper")
                     input(v-model="localTitle" @keyup.enter="changeTitle")
                   input(v-model="specificChip" @keyup.space="addChip(id)")
 
-                ion-item(v-for="tag in aTags" id="audioTags")
-                  ion-chip(color="tertiary" @click="deleteChip(id, tag)") {{ tag }}
+                ion-item(v-for="chip in aChips" id="audioChip")
+                  ion-chip(color="tertiary" @click="deleteChip(id, chip)") {{ chip }}
 
       ion-card-content
         div(id="audio-element-with-spoken-text")
@@ -61,7 +61,7 @@ const props = defineProps({
   path: String,
   id: String,
   spoken: String,
-  aTags: [],
+  aChips: [],
   title: String,
   senderAvatar: String,
   isSender: Boolean
@@ -72,11 +72,7 @@ const chips = ref([]);
 let specificChip = ref('');
 let localTitle = ref(props.title);
 let isChecked = ref(false);
-let avatarExists = ref(false);
 
-getUserSession().then(async (current_user_id) => {
-  avatarExists.value = await checkFileExists('avatars', current_user_id);
-})
 
 const kopiertToast = Swal.mixin({
   toast: true,
@@ -132,15 +128,17 @@ function copySpokenToClipboard(spoken: String) {
   }
 }
 
-function deleteChip(id: any, t: any) {
+function deleteChip(id: any, chip: any) {
 
-  const event = new CustomEvent('deleteTag', {
+
+  const event = new CustomEvent('deleteChip', {
     detail: {
       id: id,
-      tag: t
+      chip: chip
     },
   });
   window.dispatchEvent(event);
+
 }
 
 async function changeTitle() {

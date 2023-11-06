@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.id" :aTags="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -254,15 +254,20 @@ window.addEventListener('openDialogue', (event: any) => {
   };
 });
 
-window.addEventListener('deleteTag', (event: any) => {
-  audiosMerged.value = audiosMerged.value.map((audio: any) => {
-    if (audio.id === event.detail.id) {
-      // remove tag from object
-      audio.tags = audio.tags.filter((tag: any) => {
-        return tag.id !== event.detail.tag.id;
-      });
-      //TODO: delete in nhost
+window.addEventListener('deleteChip', (event: any) => {
 
+  audiosMerged.value = audiosMerged.value.map(async (audio: any) => {
+
+    if (audio.chat_id === event.detail.id) {
+      // remove tag from object
+      audio.chips = audio.chips.filter((chip: any) => {
+        return chip !== event.detail.chip
+      });
+      
+      const deleteChipResult = await nhost.graphql.request(updateChipsInChatsTable, {
+        chat_id: event.detail.id,
+        chips: audio.chips
+      });
     }
     return audio;
   });
@@ -369,8 +374,6 @@ async function stopRecording() {
   });
 
   const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
-
-  console.log(generatedChatId);
 
   const newAudioElement = {
     chat_id: generatedChatId,

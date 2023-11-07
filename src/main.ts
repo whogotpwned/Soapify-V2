@@ -14,7 +14,6 @@ import '@ionic/vue/css/normalize.css';
 import '@ionic/vue/css/structure.css';
 import '@ionic/vue/css/typography.css';
 import {AVPlugin} from 'vue-audio-visual'
-import {supabase} from "@/lib/supabase/supabaseClient";
 
 /* Optional CSS utils that can be commented out */
 import '@ionic/vue/css/padding.css';

@@ -56,19 +56,9 @@ import {useSpeechRecognition} from '@vueuse/core'
 import {v4 as uuidv4} from 'uuid';
 import Modal from "@/components/modals/contact/search/SearchContactModal.vue";
 import _ from 'lodash';
-import {supabase} from "@/lib/supabase/supabaseClient";
-import {
-  getAvatarForID,
-  getChatsOfUserWithIDSentToUserWithID,
-  getChipsOfSpecificDialogBetweenUserAndContact,
-  getUserDetailsOfUserWithID,
-  getUserSession,
-  messageSentByMe
-} from "@/lib/supabase/supabaseMethods";
 import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
 import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
         IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter } from '@ionic/vue';
-
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import AudioElement from "@/components/audio/AudioElement.vue";
 import {VoiceRecorder} from "capacitor-voice-recorder";

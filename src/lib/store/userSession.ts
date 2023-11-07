@@ -1,5 +1,4 @@
 import {defineStore} from 'pinia';
-import {getContactsOfUserWithId} from "@/lib/supabase/supabaseMethods";
 
 export const userSessionStore = defineStore({
     id: 'soapify', state: () => ({
@@ -73,6 +72,5 @@ export const userSessionStore = defineStore({
                 return dialogue.chat_id !== chatID;
             })
         },
-
     }, persist: true,
 });

@@ -70,6 +70,10 @@ export const userSessionStore = defineStore({
         }, updateDialogueTitleOfDialogueWithId(chatID: string, newTitle: string) {
             const objIndex = this.currentDialoguePartner["dialogues"].findIndex((obj => obj["chat_id"] == chatID));
             this.currentDialoguePartner["dialogues"][objIndex]["title"] = newTitle
+        }, deleteDialogueWithId(chatID: string) {
+            this.currentDialoguePartner["dialogues"] = this.currentDialoguePartner["dialogues"].filter((dialogue: any) => {
+                return dialogue.chat_id !== chatID;
+            })
         }
 
     }, persist: true,

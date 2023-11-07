@@ -76,7 +76,12 @@ import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
-import {insertChipInChipsTable, insertNewDialogue, updateChipsInChatsTable} from "@/lib/graphQL/mutations";
+import {
+  deleteChatInChatsTableByUserIdAndChatId, deleteMultipleChatsInChatsTableByUserIdAndChatIds,
+  insertChipInChipsTable,
+  insertNewDialogue,
+  updateChipsInChatsTable
+} from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {
   counterNumberOfChatsBetweenIDAndContact,
@@ -276,32 +281,19 @@ window.addEventListener('deleteChip', (event: any) => {
   });
 });
 
-window.addEventListener('deleteElement', (event: any) => {
-  getUserSession().then((current_user_id) => {
-    messageSentByMe(current_user_id, event.detail.id).then((sentByMe) => {
-      if (sentByMe) {
-        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-          return audio.id !== event.detail.id;
-        });
-
-        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-          return audio.id !== event.detail.id;
-        });
-
-        //TODO: delete in nhost
-
-
-
-      } else {
-        error_toast.fire({
-          icon: 'error',
-          title: 'Empfangene Nachrichten können aktuell nicht gelöscht werden.'
-        });
-      }
-    })
-    currentDialoguePartner.value = {};
-
+window.addEventListener('deleteElement', async (event: any) => {
+  // deleteChatInChatsTableByUserIdAndChatId
+  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+    return audio.chat_id !== event.detail.id;
   });
+
+  const deleteChatInChatsTableByUserIdAndChatIdResult = await nhost.graphql.request(deleteChatInChatsTableByUserIdAndChatId, {
+    user_id: store.getSessionID,
+    chat_id: event.detail.id
+  });
+
+  store.deleteDialogueWithId(event.detail.id);
+
 });
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
@@ -324,15 +316,25 @@ function deleteMarkedCheckboxes() {
     confirmButtonText: 'Löschen',
     denyButtonText: `Don't save`,
     heightAuto: false
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
       try {
         audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-          return !audioElementsToBeDeleted.value.includes(audio.id)
+          return !audioElementsToBeDeleted.value.includes(audio.chat_id)
         });
 
         //TODO: delete in nhost
+        const deleteMultipleChatsResult = await nhost.graphql.request(deleteMultipleChatsInChatsTableByUserIdAndChatIds, {
+          user_id: store.getSessionID,
+          chat_ids: audioElementsToBeDeleted.value
+        });
 
+        for (let i = 0; i < audioElementsToBeDeleted.value.length; i++) {
+          store.deleteDialogueWithId(audioElementsToBeDeleted.value[i]);
+        }
+
+        audioElementsToBeDeleted.value = [];
+        
       } catch (e) {
         Swal.fire({
           title: 'Fehler :(',

@@ -4,15 +4,15 @@ export const insertUser = gql`
     mutation insertNewUser($email: String!, $user_id: uuid!, $username: String!, $avatar_url: String!) {
         insert_userdetails_one(
             object:
-        {
-            email: $email,
-            user_id: $user_id,
-            avatar_url: $avatar_url,
-            username: $username}
-            on_conflict: { 
-                constraint: userdetails_pkey, 
-                update_columns: [last_login] 
-            }) 
+            {
+                email: $email,
+                user_id: $user_id,
+                avatar_url: $avatar_url,
+                username: $username}
+            on_conflict: {
+                constraint: userdetails_pkey,
+                update_columns: [last_login]
+            })
         {
             id
         }
@@ -49,7 +49,7 @@ export const deleteContactOfUserWithId = gql`
     mutation deleteContactOfUserWithId($user_id: uuid!, $contact: uuid!) {
         delete_contacts(where: {
             user_id: {
-                _eq: $user_id}, 
+                _eq: $user_id},
             contact: {
                 _eq: $contact}}) {
             returning {
@@ -92,12 +92,30 @@ export const updateChipsInChatsTable = gql`
         }
     }`
 
-export const updateTitleInChatsTable = gql `
-mutation updateTitleInChatsTable($chat_id: uuid!, $user_id: uuid!, $title: String!) {
-    update_chats(where: {chat_id: {_eq: $chat_id}, _and: {user_id: {_eq: $user_id}}}, _set: {title: $title}) {
-        returning {
-            id
-            title
+export const updateTitleInChatsTable = gql`
+    mutation updateTitleInChatsTable($chat_id: uuid!, $user_id: uuid!, $title: String!) {
+        update_chats(where: {chat_id: {_eq: $chat_id}, _and: {user_id: {_eq: $user_id}}}, _set: {title: $title}) {
+            returning {
+                id
+                title
+            }
         }
-    }
-}`
+    }`
+
+export const deleteChatInChatsTableByUserIdAndChatId = gql`
+    mutation deleteChatInChatsTableByUserIdAndChatId($user_id: uuid!, $chat_id: uuid!) {
+        delete_chats(where: {user_id: {_eq: $user_id}, chat_id: {_eq: $chat_id}}) {
+            returning {
+                id
+            }
+        }
+    }`
+
+export const deleteMultipleChatsInChatsTableByUserIdAndChatIds = gql`
+    mutation deleteMultipleChatsInChatsTableByUserIdAndChatIds($user_id: uuid!, $chat_ids: [uuid!]!) {
+        delete_chats(where: {user_id: {_eq: $user_id}, chat_id: {_in: $chat_ids}}) {
+            returning {
+                id
+            }
+        }
+    }`

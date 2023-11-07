@@ -83,11 +83,9 @@ async function login() {
           store.setSessionID(userID);
           store.setEmail(userEmail);
           store.setAvatarURL(userAvatarUrl);
-          store.setAccessToken(signInResult.session?.accessToken);
-          store.setRefreshToken(signInResult.session?.refreshToken);
 
-          localStorage.setItem('accessToken', signInResult.session?.accessToken);
-
+          localStorage.setItem('soapifyAccessToken', signInResult.session?.accessToken);
+          localStorage.setItem('soapifyRefreshToken', signInResult.session?.refreshToken);
         }
 
         const avatarHash = await sha256(userEmail);

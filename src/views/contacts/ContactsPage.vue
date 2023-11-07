@@ -37,14 +37,7 @@ import {
 } from '@ionic/vue';
 import ContactElement from "@/components/contact/element/ContactElement.vue";
 import {add} from "ionicons/icons";
-import {
-  getAvatarForID,
-  getUserDetailsOfUserWithID,
-  checkIfUserExistsInAuth,
-  getUserSession
-} from "@/lib/supabase/supabaseMethods";
-import {supabase} from "@/lib/supabase/supabaseClient";
-import {onMounted, ref} from "vue";
+import {ref} from "vue";
 import Swal from "sweetalert2";
 import {modalController} from "@ionic/vue";
 import AddContactModal from "@/components/modals/contact/add/AddContactModal.vue";
@@ -76,13 +69,8 @@ async function refreshAllContactsFromNhost() {
 
   const numberOfContacts = contactsSearchResult.data.contacts.length;
 
-  console.log("Number of Contact: ")
-  console.log(numberOfContacts)
-
   // loop over all contacts
   for (let i = 0; i < numberOfContacts; i++) {
-    console.log(i);
-
     const contactId = contactsSearchResult.data.contacts[i].contact;
 
     const userDetailsOfUserWithID = await nhost.graphql.request(getUser, {user_id: contactId});
@@ -93,7 +81,6 @@ async function refreshAllContactsFromNhost() {
       user_id: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].user_id : "",
       email: userDetailsOfUserWithID.data.userdetails[0] ? userDetailsOfUserWithID.data.userdetails[0].email : ""
     }
-
 
     if (!store.contactsContainUserWithID(contactDetails.user_id)) {
       store.addToContactInformation(contactDetails);
@@ -121,10 +108,8 @@ async function loadAllContacts()  {
     const numberOfContactsOfUser = numberOfContactsForUserWithIdResult.data.contacts_aggregate.aggregate.count;
 
     if (store.getContactInformation.length < numberOfContactsOfUser) {
-      console.log("From Nhost")
       await refreshAllContactsFromNhost();
     } else {
-      console.log("From Store");
       await refreshAllContactsFromStore();
     }
   } catch (e) {

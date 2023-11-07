@@ -49,7 +49,7 @@ ion-page
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import {modalController, onIonViewWillEnter} from "@ionic/vue";
 import Swal from "sweetalert2";
 import {useSpeechRecognition} from '@vueuse/core'
@@ -71,7 +71,6 @@ import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolba
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import AudioElement from "@/components/audio/AudioElement.vue";
-
 import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
@@ -87,6 +86,7 @@ import {
   counterNumberOfChatsBetweenIDAndContact,
   getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
 } from "@/lib/graphQL/queries";
+import { createClient } from 'graphql-sse';
 
 const {
   result,
@@ -213,6 +213,7 @@ const openModal = async () => {
   modal.present();
 };
 
+
 window.addEventListener('search', (event: any) => {
   searchTerm.value = event.detail.chipSuche;
   /* only keep those cards which contain a tag matching chipSuche */
@@ -295,6 +296,13 @@ window.addEventListener('deleteElement', async (event: any) => {
   store.deleteDialogueWithId(event.detail.id);
 
 });
+
+
+onMounted(async () => {
+
+
+
+})
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
   const checked = event.detail.boxChecked;

@@ -33,6 +33,7 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import {onLongPress} from "@vueuse/core";
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 
 const props = defineProps({
   user: String,
@@ -75,7 +76,6 @@ function openDialogue(user, user_id, email) {
       store.addToActiveChats(currentDialoguePartner)
       store.setCurrentDialoguePartner(currentDialoguePartner)
     } else {
-      console.log("Doch")
       store.updateTimestampOfActiveChatWithID(user_id, lastAccessTimestamp);
     }
     store.setLastActiveChatWasWithID(user_id);
@@ -90,6 +90,8 @@ function openDialogue(user, user_id, email) {
     router.push('/tabs/dialogue');
   }
 }
+
+console.log(nhost.auth.getSession())
 
 function deleteElement(user_id) {
   try {

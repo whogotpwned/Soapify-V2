@@ -323,7 +323,6 @@ function deleteMarkedCheckboxes() {
           return !audioElementsToBeDeleted.value.includes(audio.chat_id)
         });
 
-        //TODO: delete in nhost
         const deleteMultipleChatsResult = await nhost.graphql.request(deleteMultipleChatsInChatsTableByUserIdAndChatIds, {
           user_id: store.getSessionID,
           chat_ids: audioElementsToBeDeleted.value
@@ -334,7 +333,6 @@ function deleteMarkedCheckboxes() {
         }
 
         audioElementsToBeDeleted.value = [];
-        
       } catch (e) {
         Swal.fire({
           title: 'Fehler :(',

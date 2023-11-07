@@ -85,6 +85,9 @@ async function login() {
           store.setAvatarURL(userAvatarUrl);
           store.setAccessToken(signInResult.session?.accessToken);
           store.setRefreshToken(signInResult.session?.refreshToken);
+
+          localStorage.setItem('accessToken', signInResult.session?.accessToken);
+
         }
 
         const avatarHash = await sha256(userEmail);

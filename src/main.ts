@@ -31,10 +31,10 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedState);
 
 const app = createApp(App)
+    .use(pinia)
     .use(IonicVue)
     .use(router)
     .use(AVPlugin)
-    .use(pinia)
     .use(apolloProvider);
 
 router.isReady().then(() => {

@@ -25,6 +25,7 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedState);
@@ -35,6 +36,15 @@ const app = createApp(App)
     .use(router)
     .use(AVPlugin)
     .use(apolloProvider);
+
+
+// per default the session is valid for 15 minutes
+// we refresh the session every 12.5 minutes to be sure that the session is always valid
+setInterval(() => {
+    nhost.auth.refreshSession().then((res) => {
+        localStorage.setItem('soapifyAccessToken', res.session?.accessToken);
+    });
+}, 750000);
 
 router.isReady().then(() => {
     app.mount('#app');

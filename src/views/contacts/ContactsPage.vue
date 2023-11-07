@@ -16,6 +16,8 @@ ion-page
           ion-label
             ContactElement(:avatar="contact.avatarSrc" :email="contact.email" :user="contact.username" :user_id="contact.user_id")
 
+    p query
+
   ion-footer
     ion-toolbar
       ion-button(id="addButton" shape="round" @click="openAddContactModal")
@@ -249,6 +251,7 @@ window.addEventListener('idContactSearch', async (event: any) => {
   }
 });
 </script>
+
 
 <style scoped>
 @import './style.css';

@@ -6,6 +6,7 @@ import {userSessionStore} from "@/lib/store/userSession";
 import RegisterPage from "@/views/register/RegisterPage.vue";
 import {supabase} from "@/lib/supabase/supabaseClient";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import Foobar from "@/views/contacts/Foobar.vue";
 
 const routes: Array<RouteRecordRaw> = [{
     path: '/', redirect: '/tabs/chats',
@@ -13,7 +14,11 @@ const routes: Array<RouteRecordRaw> = [{
     path: '/login', component: LoginPage
 }, {
     path: '/register', component: RegisterPage
-}, {
+    },
+    {
+     path: '/foobar', component: Foobar,
+    },
+    {
     path: '/tabs/', component: TabsPage, meta: {
         requiresAuth: true
     }, children: [{

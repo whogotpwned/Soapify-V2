@@ -4,6 +4,7 @@ import router from './router';
 import {IonicVue} from '@ionic/vue';
 import {createPinia} from 'pinia';
 import piniaPluginPersistedState from "pinia-plugin-persistedstate"
+import {apolloProvider} from "@/lib/apollo/client/apolloClient";
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -33,7 +34,8 @@ const app = createApp(App)
     .use(IonicVue)
     .use(router)
     .use(AVPlugin)
-    .use(pinia);
+    .use(pinia)
+    .use(apolloProvider);
 
 router.isReady().then(() => {
     app.mount('#app');

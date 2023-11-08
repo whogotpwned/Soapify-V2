@@ -74,7 +74,7 @@ import {
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {
   counterNumberOfChatsBetweenIDAndContact,
-  getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
+  getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId, getDialoguesBetweenIDAndContactSubscription
 } from "@/lib/graphQL/queries";
 import { createClient} from 'graphql-ws';
 
@@ -291,27 +291,38 @@ onMounted(async () => {
   const client = createClient({
     url: nhost.graphql.wsUrl,
     connectionParams: () => {
-      const token = localStorage.getItem('soapifyAccessToken');
+      const token = nhost.auth.getAccessToken();
       return {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-    }
+    },
+
   });
 
-  // TODO: Go on here ...
-  const subscription = client.iterate({
-    query: getDialoguesBetweenIDAndContact,
+  const subscription = client.subscribe({
+    query: getDialoguesBetweenIDAndContactSubscription,
     variables: {
-      user_id: "24c15802-b5a2-4382-a2d0-d5ac6df7cf52",
-      contact: "d85cadb4-08db-497c-bd17-0550e205834d"
+      user_id: store.getSessionID,
+      contact: store.getCurrentDialoguePartner.user_id
     }
+  }, {
+    next(data) {
+      console.log(data);
+    },
+    complete() {
+      console.log('done');
+    },
+    error(e) {
+      console.log(e);
+    },
   });
-
-  for await (const event of subscription) {
-    console.log(event);
-  }
+  //
+  //
+  // for await (const event of subscription) {
+  //   console.log(event);
+  // }
 })
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {

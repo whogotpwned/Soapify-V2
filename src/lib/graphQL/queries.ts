@@ -81,6 +81,27 @@ export const getDialoguesBetweenIDAndContact = gql`
     }`
 
 
+export const getDialoguesBetweenIDAndContactSubscription = gql`
+    subscription getDialoguesBetweenIDAndContact($user_id: uuid!, $contact: uuid!){
+        chats(where: {
+            user_id: {
+                _eq: $user_id
+            },
+            contact: {
+                _eq: $contact
+            }}) {
+            user_id
+            title
+            speech_to_text
+            created_at
+            contact
+            chips
+            chat_id
+            audio
+        }
+    }`
+
+
 export const getChipsOfChatId = gql`
     query getChipsOfChatId($chat_id: uuid!){
         chats(where: {chat_id: {_eq: $chat_id}}) {

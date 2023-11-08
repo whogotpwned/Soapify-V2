@@ -25,6 +25,7 @@
     "@ionic/vue-router": "^7.0.0",
     "@nhost/vue": "^1.14.0",
     "@supabase/supabase-js": "^2.38.0",
+    "@vue/apollo-composable": "^4.0.0-beta.11",
     "@vue/apollo-option": "^4.0.0-beta.9",
     "@vueuse/core": "^10.5.0",
     "audiomotion-analyzer": "^4.3.0",

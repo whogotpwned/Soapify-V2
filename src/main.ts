@@ -41,10 +41,18 @@ const app = createApp(App)
 // per default the session is valid for 15 minutes
 // we refresh the session every 12.5 minutes to be sure that the session is always valid
 setInterval(() => {
+
     nhost.auth.refreshSession().then((res) => {
+        console.log(localStorage.getItem('soapifyAccessToken'));
         localStorage.setItem('soapifyAccessToken', res.session?.accessToken);
+        console.log(localStorage.getItem('soapifyAccessToken'));
     });
-}, 750000);
+
+}, 10 * 1000 * 60);
+
+setInterval(() => {
+    console.log("Token expires in: " + nhost.auth.getSession()?.accessTokenExpiresIn + "s");
+}, 5 * 1000 * 60)
 
 router.isReady().then(() => {
     app.mount('#app');

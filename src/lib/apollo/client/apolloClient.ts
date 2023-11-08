@@ -4,6 +4,7 @@ import {createApolloProvider} from '@vue/apollo-option'
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {GraphQLWsLink} from "@apollo/client/link/subscriptions";
 import {createClient} from "graphql-sse";
+import { WebSocketLink } from "@apollo/client/link/ws"
 
 
 // WS connection to the API

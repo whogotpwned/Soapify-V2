@@ -76,7 +76,7 @@ import {
   counterNumberOfChatsBetweenIDAndContact,
   getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
 } from "@/lib/graphQL/queries";
-import { createClient } from 'graphql-sse';
+import { createClient} from 'graphql-ws';
 
 const {
   result,
@@ -287,11 +287,31 @@ window.addEventListener('deleteElement', async (event: any) => {
 
 });
 
-
 onMounted(async () => {
+  const client = createClient({
+    url: nhost.graphql.wsUrl,
+    connectionParams: () => {
+      const token = localStorage.getItem('soapifyAccessToken');
+      return {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+    }
+  });
 
+  // TODO: Go on here ...
+  const subscription = client.iterate({
+    query: getDialoguesBetweenIDAndContact,
+    variables: {
+      user_id: "24c15802-b5a2-4382-a2d0-d5ac6df7cf52",
+      contact: "d85cadb4-08db-497c-bd17-0550e205834d"
+    }
+  });
 
-
+  for await (const event of subscription) {
+    console.log(event);
+  }
 })
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {

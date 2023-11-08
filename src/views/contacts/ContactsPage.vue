@@ -39,7 +39,7 @@ import {
 } from '@ionic/vue';
 import ContactElement from "@/components/contact/element/ContactElement.vue";
 import {add} from "ionicons/icons";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import Swal from "sweetalert2";
 import {modalController} from "@ionic/vue";
 import AddContactModal from "@/components/modals/contact/add/AddContactModal.vue";
@@ -50,6 +50,7 @@ import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {countNumberOfUsersWithId, getUser, getContactsOfUserWithId, countNumberOfContactsOfUserWithId} from "@/lib/graphQL/queries";
 import {insertOneContact, deleteContactOfUserWithId} from "@/lib/graphQL/mutations";
 import {sha256} from "@/views/contacts/methods";
+import { createClient} from 'graphql-ws';
 
 const contacts = ref([] as Array<Object>);
 const store = userSessionStore();
@@ -98,7 +99,6 @@ async function refreshAllContactsFromStore() {
     contacts.value.push(store.getContactInformation[i]);
   }
 }
-
 
 async function loadAllContacts()  {
   contacts.value = [];

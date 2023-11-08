@@ -26,6 +26,7 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import { createClient } from 'graphql-ws';
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedState);
@@ -41,13 +42,11 @@ const app = createApp(App)
 // per default the session is valid for 15 minutes
 // we refresh the session every 12.5 minutes to be sure that the session is always valid
 setInterval(() => {
-
     nhost.auth.refreshSession().then((res) => {
         console.log(localStorage.getItem('soapifyAccessToken'));
         localStorage.setItem('soapifyAccessToken', res.session?.accessToken);
         console.log(localStorage.getItem('soapifyAccessToken'));
     });
-
 }, 10 * 1000 * 60);
 
 setInterval(() => {

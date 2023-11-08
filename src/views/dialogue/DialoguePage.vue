@@ -151,11 +151,10 @@ async function refreshAllChats() {
       });
     }
 
+
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   } else {
-    console.log("Loading from Store");
-
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
 
@@ -167,6 +166,7 @@ async function refreshAllChats() {
   // add another key to each audio element to indicate whether it was sent by me or not if user_id matches
   // store.getSessionID it is sent by me
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
+
     audio.sentByMe = audio.user_id === store.getSessionID;
     return audio;
   });
@@ -310,6 +310,7 @@ onMounted(async () => {
   }, {
     next(data) {
       console.log(data);
+
     },
     complete() {
       console.log('done');
@@ -417,6 +418,7 @@ async function stopRecording() {
     title: title,
     sentByMe: true,
     spokenText: result.value,
+    user_id: store.getSessionID,
     chips: []
   }
 

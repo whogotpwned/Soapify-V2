@@ -90,6 +90,7 @@ export const getDialoguesBetweenIDAndContactSubscription = gql`
             contact: {
                 _eq: $contact
             }}) {
+            id
             user_id
             title
             speech_to_text

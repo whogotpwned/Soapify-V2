@@ -35,7 +35,7 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
     ion-toolbar
@@ -56,7 +56,6 @@ import {useSpeechRecognition} from '@vueuse/core'
 import {v4 as uuidv4} from 'uuid';
 import Modal from "@/components/modals/contact/search/SearchContactModal.vue";
 import _ from 'lodash';
-import {supabase} from "@/lib/supabase/supabaseClient";
 import {
   getAvatarForID,
   getChatsOfUserWithIDSentToUserWithID,
@@ -66,11 +65,12 @@ import {
   messageSentByMe
 } from "@/lib/supabase/supabaseMethods";
 import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
-import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
-        IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter } from '@ionic/vue';
+import {
+  IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
+  IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter
+} from '@ionic/vue';
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
-import AudioElement from "@/components/audio/AudioElement.vue";
 import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
@@ -86,7 +86,8 @@ import {
   counterNumberOfChatsBetweenIDAndContact,
   getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
 } from "@/lib/graphQL/queries";
-import { createClient } from 'graphql-sse';
+import {createClient} from 'graphql-sse';
+import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 
 const {
   result,
@@ -127,7 +128,7 @@ refreshAllChats();
 
 async function refreshAllChats() {
 
-  if(!store.currentDialoguePartner.user_id) {
+  if (!store.currentDialoguePartner.user_id) {
     return;
   }
 
@@ -225,34 +226,6 @@ window.addEventListener('search', (event: any) => {
   searchbarPlaceholder.value = `chipSuche:[${event.detail.chipSuche}]`;
 });
 
-window.addEventListener('addChip',async (event: any) => {
-  const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
-    chips: [{chip: event.detail.tag}]
-  })
-
-  const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
-
-  const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
-    chat_id: event.detail.id,
-  });
-
-  const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
-
-  const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
-    chat_id: event.detail.id,
-    chips: [...chipsOfChatWithId, insertChipsResultId]
-  });
-
-
-  audiosMerged.value = audiosMerged.value.map((audio: any) => {
-
-    if (audio.chat_id === event.detail.id) {
-      // extend object by tag
-      audio["chips"].push(event.detail.tag);
-    }
-    return audio;
-  });
-});
 
 window.addEventListener('openDialogue', (event: any) => {
   currentDialoguePartner.value = {
@@ -272,7 +245,7 @@ window.addEventListener('deleteChip', (event: any) => {
       audio.chips = audio.chips.filter((chip: any) => {
         return chip !== event.detail.chip
       });
-      
+
       const deleteChipResult = await nhost.graphql.request(updateChipsInChatsTable, {
         chat_id: event.detail.id,
         chips: audio.chips
@@ -299,7 +272,6 @@ window.addEventListener('deleteElement', async (event: any) => {
 
 
 onMounted(async () => {
-
 
 
 })

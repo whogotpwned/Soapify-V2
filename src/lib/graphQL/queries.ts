@@ -117,3 +117,11 @@ export const getChipsWithId = gql`
             chip
         }
     }`
+
+
+export const getChatIdOfChatWithTitle = gql`
+    query getChatIdOfChatWithTitle($title: String!) {
+        chats(where: {title: {_eq: $title}}) {
+            chat_id
+        }
+    }`

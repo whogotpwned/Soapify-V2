@@ -34,7 +34,7 @@ ion-page
     ExploreContainer(name="Tab 1 page")
 
     div(v-if="store.lastActiveChatWasWithID")
-      div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
+      div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
         AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
   ion-footer
@@ -54,11 +54,13 @@ import {modalController, onIonViewWillEnter} from "@ionic/vue";
 import Swal from "sweetalert2";
 import {useSpeechRecognition} from '@vueuse/core'
 import {v4 as uuidv4} from 'uuid';
-import Modal from "@/components/modals/contact/search/SearchContactModal.vue";
+import Modal from "@/components/modals/contact/search/SearchDialogueModal.vue";
 import _ from 'lodash';
 import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
-import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
-        IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter } from '@ionic/vue';
+import {
+  IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
+  IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter
+} from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import AudioElement from "@/components/audio/AudioElement.vue";
 import {VoiceRecorder} from "capacitor-voice-recorder";
@@ -74,9 +76,13 @@ import {
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {
   counterNumberOfChatsBetweenIDAndContact,
-  getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId, getDialoguesBetweenIDAndContactSubscription
+  getDialoguesBetweenIDAndContact,
+  getChipsOfChatId,
+  getChipsWithId,
+  getDialoguesBetweenIDAndContactSubscription,
+  getChatIdOfChatWithTitle
 } from "@/lib/graphQL/queries";
-import { createClient} from 'graphql-ws';
+import {createClient} from 'graphql-ws';
 
 const {
   result,
@@ -92,29 +98,11 @@ const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
 const currentDialoguePartner = ref({});
 const isRecording = ref(false);
-const searchTerm = ref('');
+const titleSearch = ref('');
 const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 
-
-
-watch(audiosMerged, (currentValue, oldValue) => {
-
- console.log("jkhasdajkdhsdasjhk")
-
-}, {deep: true});
-
-const showLoading = async () => {
-  const loading = await loadingController.create({
-    message: 'Lade Dialoge ...',
-  });
-  loading.present();
-};
-
-const stopLoading = async () => {
-  await loadingController.dismiss();
-};
 
 onIonViewWillEnter(() => {
   refreshAllChats();
@@ -124,7 +112,7 @@ refreshAllChats();
 
 async function refreshAllChats() {
 
-  if(!store.currentDialoguePartner.user_id) {
+  if (!store.currentDialoguePartner.user_id) {
     return;
   }
 
@@ -173,13 +161,14 @@ async function refreshAllChats() {
   // add another key to each audio element to indicate whether it was sent by me or not if user_id matches
   // store.getSessionID it is sent by me
   audiosMerged.value = audiosMerged.value.map((audio: any) => {
-
     audio.sentByMe = audio.user_id === store.getSessionID;
     return audio;
   });
+
+  audiosMerged.value = getAudiosSortedByCreatedAt();
 }
 
-function getAudiosMerged() {
+function getAudiosSortedByCreatedAt() {
   return audiosMerged.value.sort((a: any, b: any) => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   })
@@ -211,18 +200,24 @@ const openModal = async () => {
 };
 
 
-window.addEventListener('search', (event: any) => {
-  searchTerm.value = event.detail.chipSuche;
-  /* only keep those cards which contain a tag matching chipSuche */
-  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-    return audio.tags.some((tag: any) => {
-      return tag.value.includes(searchTerm.value);
-    });
+window.addEventListener('search', async (event: any) => {
+  titleSearch.value = event.detail.titleSearch;
+
+  const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
+    title: titleSearch.value,
   });
-  searchbarPlaceholder.value = `chipSuche:[${event.detail.chipSuche}]`;
+
+  const targetChatId = getChatIdOfChatWithTitleResult.data.chats[0].chat_id;
+
+  // keep only the elements of audiosMerged where the chat_id matches targetChatId
+  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+    return audio.chat_id === targetChatId;
+  });
+
+
 });
 
-window.addEventListener('addChip',async (event: any) => {
+window.addEventListener('addChip', async (event: any) => {
   const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
     chips: [{chip: event.detail.tag}]
   })
@@ -269,7 +264,7 @@ window.addEventListener('deleteChip', (event: any) => {
       audio.chips = audio.chips.filter((chip: any) => {
         return chip !== event.detail.chip
       });
-      
+
       const deleteChipResult = await nhost.graphql.request(updateChipsInChatsTable, {
         chat_id: event.detail.id,
         chips: audio.chips
@@ -291,7 +286,6 @@ window.addEventListener('deleteElement', async (event: any) => {
   });
 
   store.deleteDialogueWithId(event.detail.id);
-
 });
 
 onMounted(async () => {
@@ -435,12 +429,11 @@ async function stopRecording() {
   }
 
   audiosMerged.value.push(newAudioElement);
-
   store.addDialogueToCurrentDialoguePartner(newAudioElement);
 }
 
 function clearSearch() {
-  audiosMerged.value = audiosBackupMerged.value;
+  audiosMerged.value = store.getCurrentDialoguePartner.dialogues
   audiosBackupMerged.value = [];
   searchbarPlaceholder.value = 'Suche ...';
 }

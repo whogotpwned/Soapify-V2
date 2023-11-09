@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function getCurrentDateTimestamp() {
     let date_time = new Date();
 
@@ -9,4 +11,10 @@ export function getCurrentDateTimestamp() {
     let seconds = date_time.getSeconds();
 
     return year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds;
+}
+
+export function getCurrentDateTimestampInDatepickerFormat() {
+    return moment().utc().format("YYYY-MM-DDTHH:mm:ss") + "Z";
+
+    // '2023-01-01T15:43:00.000Z'
 }

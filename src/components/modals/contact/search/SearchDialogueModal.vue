@@ -9,7 +9,22 @@ ion-header
 
 ion-content(class="ion-padding")
   ion-item
-    ion-input(v-model="titelSuche" label="Nach Titel suchen" label-placement="stacked" placeholder="Titel")
+    ion-grid
+      ion-row
+        ion-col
+          p Titel:
+        ion-col
+          ion-input(v-model="titelSuche" )
+
+  ion-item
+    ion-grid
+      ion-row
+        ion-col
+          p Datum: {{ datumSuche }}
+        ion-col
+          ion-datetime-button(datetime='datetime')
+          ion-modal(:keep-contents-mounted='true')
+            ion-datetime(v-model="datumSuche" :value="datumSuche")#datetime
 </template>
 
 <script lang="ts" setup>
@@ -24,11 +39,18 @@ import {
   IonToolbar,
   modalController,
 } from '@ionic/vue';
+import { IonDatetime, IonDatetimeButton, IonModal } from '@ionic/vue';
+import {getCurrentDateTimestamp, getCurrentDateTimestampInDatepickerFormat} from "@/views/dialogue/methods";
 import {ref} from 'vue';
 
 const titelSuche = ref();
+const datumSuche = ref(getCurrentDateTimestampInDatepickerFormat());
 
 const cancel = () => modalController.dismiss(null, 'cancel');
+
+const check = () => {
+  console.log(datumSuche.value)
+}
 
 function confirm() {
   /* send event to parent component Tap1Page.vue */

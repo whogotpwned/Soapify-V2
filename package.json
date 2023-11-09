@@ -39,6 +39,7 @@
     "ionicons": "^7.0.0",
     "jquery": "^3.7.1",
     "lodash": "^4.17.21",
+    "moment": "^2.29.4",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.0",
     "pug": "^3.0.2",

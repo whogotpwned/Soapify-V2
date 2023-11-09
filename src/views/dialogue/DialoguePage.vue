@@ -298,19 +298,29 @@ onMounted(async () => {
         },
       };
     },
-
   });
 
   const subscription = client.subscribe({
     query: getDialoguesBetweenIDAndContactSubscription,
     variables: {
-      user_id: store.getSessionID,
-      contact: store.getCurrentDialoguePartner.user_id
+      user_id: store.getCurrentDialoguePartner.user_id,
+      contact: store.getSessionID
     }
   }, {
     next(data) {
-      console.log(data);
+      const lastDialogue = data.data.chats[0];
 
+      if (!lastDialogue) return;
+
+      // check if chat_id of lastDialogue is already in audiosMerged.value and not add id to it
+      if (audiosMerged.value.some((audio: any) => {
+        return audio.chat_id === lastDialogue.chat_id;
+      })) {
+        console.log("Nothing to update :)");
+      } else {
+        audiosMerged.value.push(lastDialogue);
+        store.addDialogueToCurrentDialoguePartner(lastDialogue);
+      }
     },
     complete() {
       console.log('done');
@@ -319,11 +329,6 @@ onMounted(async () => {
       console.log(e);
     },
   });
-  //
-  //
-  // for await (const event of subscription) {
-  //   console.log(event);
-  // }
 })
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {

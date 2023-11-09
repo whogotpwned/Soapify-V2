@@ -83,7 +83,7 @@ export const getDialoguesBetweenIDAndContact = gql`
 
 export const getDialoguesBetweenIDAndContactSubscription = gql`
     subscription getDialoguesBetweenIDAndContact($user_id: uuid!, $contact: uuid!){
-        chats(where: {
+        chats(limit: 1, order_by: {id: desc}, where: {
             user_id: {
                 _eq: $user_id
             },

@@ -49,7 +49,7 @@ ion-page
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch, watchEffect} from 'vue'
 import {modalController, onIonViewWillEnter} from "@ionic/vue";
 import Swal from "sweetalert2";
 import {useSpeechRecognition} from '@vueuse/core'
@@ -97,6 +97,13 @@ const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 
+
+
+watch(audiosMerged, (currentValue, oldValue) => {
+
+ console.log("jkhasdajkdhsdasjhk")
+
+}, {deep: true});
 
 const showLoading = async () => {
   const loading = await loadingController.create({

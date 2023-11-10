@@ -211,28 +211,31 @@ const openModal = async () => {
 
 
 window.addEventListener('search', async (event: any) => {
-  titleSearch.value = event.detail.searchValue.titleSearch;
-  dateSearch.value = event.detail.searchValue.dateSearch;
 
 
-  if (event.detail.searchKey === 'titleSearch') {
+  console.log(event.detail.titelsucheSelected)
+  console.log(event.detail.titelSuche)
+  console.log(event.detail.dateSearchStartingChecked)
+  console.log(event.detail.dateSearchStarting)
+  console.log(event.detail.dateSearchEndingChecked)
+  console.log(event.detail.dateSearchEnding)
 
-    searchbarPlaceholder.value = `Titelsuche: [${titleSearch.value}]`
 
+
+  if (event.detail.titelsucheSelected) {
+    searchbarPlaceholder.value = `Titelsuche: [${event.detail.titelSuche}]`
     const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
-      title: titleSearch.value,
+      title: event.detail.titelSuche,
     });
-
     const targetChatId = getChatIdOfChatWithTitleResult.data.chats[0].chat_id;
 
     // keep only the elements of audiosMerged where the chat_id matches targetChatId
     audiosMerged.value = audiosMerged.value.filter((audio: any) => {
       return audio.chat_id === targetChatId;
     });
-
   } else if (event.detail.searchKey === 'dateRangeSearch') {
 
-
+    console.log(dateSearch.value);
 
 
 
@@ -463,11 +466,15 @@ async function stopRecording() {
 function clearSearch() {
   audiosMerged.value = store.getCurrentDialoguePartner.dialogues
   store.setSearchObject({
-    searchKey: '',
-    searchValue: {
-      titleSearch: '',
-      dateSearch: ''
-    }});
+    searchDetails: {
+      titelsucheSelected: false,
+      titelSuche: "",
+      dateSearchStartingChecked: false,
+      dateSearchStarting: "",
+      dateSearchEndingChecked: false,
+      dateSearchEnding: "",
+    }
+  });
   audiosBackupMerged.value = [];
   searchbarPlaceholder.value = 'Suche ...';
 }

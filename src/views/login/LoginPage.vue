@@ -119,9 +119,24 @@ async function login() {
       title: 'Fehler beim Einloggen'
     });
   } finally {
+    await resetSearchObject();
     await stopLoading();
   }
 }
+
+async function resetSearchObject() {
+  store.setSearchObject({
+    searchDetails: {
+      titelsucheSelected: false,
+      titelSuche: '',
+      dateSearchStartingChecked: false,
+      dateSearchStarting: '',
+      dateSearchEndingChecked: false,
+      dateSearchEnding: '',
+    }
+  })
+}
+
 </script>
 
 <style scoped>

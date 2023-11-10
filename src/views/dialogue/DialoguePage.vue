@@ -142,14 +142,7 @@ async function refreshAllChats() {
 
       dialogues[i].chips = [];
 
-      console.log()
-
-
       chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
-        console.log("+++++")
-        console.log(chipElement.chip);
-        console.log("+++++")
-
 
         dialogues[i].chips.push(chipElement.chip);
       });
@@ -212,16 +205,6 @@ const openModal = async () => {
 
 window.addEventListener('search', async (event: any) => {
 
-
-  console.log(event.detail.titelsucheSelected)
-  console.log(event.detail.titelSuche)
-  console.log(event.detail.dateSearchStartingChecked)
-  console.log(event.detail.dateSearchStarting)
-  console.log(event.detail.dateSearchEndingChecked)
-  console.log(event.detail.dateSearchEnding)
-
-
-
   if (event.detail.titelsucheSelected) {
     searchbarPlaceholder.value = `Titelsuche: [${event.detail.titelSuche}]`
     const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
@@ -235,17 +218,12 @@ window.addEventListener('search', async (event: any) => {
     });
   } else if (event.detail.searchKey === 'dateRangeSearch') {
 
+    // TODO: Go on here ...
     console.log(dateSearch.value);
 
 
 
   }
-
-
-
-
-
-
 });
 
 window.addEventListener('addChip', async (event: any) => {

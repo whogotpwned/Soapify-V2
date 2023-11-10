@@ -27,9 +27,9 @@ ion-content(class="ion-padding")
           ion-col
             p Von: {{ dateSearchStarting }}
           ion-col
-            ion-datetime-button(datetime='datetime')
+            ion-datetime-button(datetime='datetimeStarting')
             ion-modal(:keep-contents-mounted='true')
-              ion-datetime(v-model="dateSearchStarting" :value="dateSearchStarting")#datetime
+              ion-datetime(v-model="dateSearchStarting" :value="dateSearchStarting")#datetimeStarting
 
     ion-item
       ion-grid
@@ -39,9 +39,9 @@ ion-content(class="ion-padding")
           ion-col
             p Von: {{ dateSearchEnding }}
           ion-col
-            ion-datetime-button(datetime='datetime')
+            ion-datetime-button(datetime='datetimeEnding')
             ion-modal(:keep-contents-mounted='true')
-              ion-datetime(v-model="dateSearchEnding" :value="dateSearchEnding")#datetime
+              ion-datetime(v-model="dateSearchEnding" :value="dateSearchEnding")#datetimeEnding
 
 </template>
 

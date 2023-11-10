@@ -80,7 +80,7 @@ import {
   getChipsOfChatId,
   getChipsWithId,
   getDialoguesBetweenIDAndContactSubscription,
-  getChatIdOfChatWithTitle
+  getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
 import {createClient} from 'graphql-ws';
 
@@ -205,7 +205,7 @@ const openModal = async () => {
 
 window.addEventListener('search', async (event: any) => {
 
-  if (event.detail.titelsucheSelected) {
+  if (event.detail.titelsucheSelected && !event.detail.dateSearchStartingChecked && !event.detail.dateSearchEndingChecked) {
     searchbarPlaceholder.value = `Titelsuche: [${event.detail.titelSuche}]`
     const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
       title: event.detail.titelSuche,
@@ -216,13 +216,21 @@ window.addEventListener('search', async (event: any) => {
     audiosMerged.value = audiosMerged.value.filter((audio: any) => {
       return audio.chat_id === targetChatId;
     });
-  } else if (event.detail.searchKey === 'dateRangeSearch') {
+  } else if (!event.detail.titelsucheSelected && (event.detail.dateSearchStartingChecked || event.detail.dateSearchEndingChecked)) {
 
     // TODO: Go on here ...
     console.log(dateSearch.value);
 
+    searchbarPlaceholder.value = `Datumssuche: [${event.detail.titelSuche}]`
 
+    const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult = await nhost.graphql.request(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange, {
+      user_id: store.getSessionID,
+      contact: store.getCurrentDialoguePartner.user_id,
+      start: event.detail.dateSearchStarting,
+      end: event.detail.dateSearchEnding
+    });
 
+    console.log(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult);
   }
 });
 

@@ -125,3 +125,15 @@ export const getChatIdOfChatWithTitle = gql`
             chat_id
         }
     }`
+
+
+export const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange = gql`
+    
+    query getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange($user_id: uuid!, $contact: uuid!, $start: timestamptz!, $end: timestamptz!) {
+        chats(where: {user_id: {_eq: $user_id}, 
+            _and: {created_at: {_gte: $start}, 
+                _and: {created_at: {_lte: $end}, 
+                    _and: {contact: {_eq: $contact}}}}}) {
+            id
+        }
+    }`

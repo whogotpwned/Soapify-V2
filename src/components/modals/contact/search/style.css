@@ -1,0 +1,7 @@
+input[type="radio"] {
+    margin-top: 15pt;
+    margin-right: 5pt;
+    -ms-transform: scale(1.5); /* IE 9 */
+    -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
+    transform: scale(1.5);
+}

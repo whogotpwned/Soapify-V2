@@ -99,6 +99,7 @@ const audiosMerged = ref([] as Array<Object>);
 const currentDialoguePartner = ref({});
 const isRecording = ref(false);
 const titleSearch = ref('');
+const dateSearch = ref('');
 const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
@@ -141,7 +142,15 @@ async function refreshAllChats() {
 
       dialogues[i].chips = [];
 
+      console.log()
+
+
       chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
+        console.log("+++++")
+        console.log(chipElement.chip);
+        console.log("+++++")
+
+
         dialogues[i].chips.push(chipElement.chip);
       });
     }
@@ -150,6 +159,7 @@ async function refreshAllChats() {
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   } else {
+    console.log("From Store")
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
 
@@ -201,18 +211,36 @@ const openModal = async () => {
 
 
 window.addEventListener('search', async (event: any) => {
-  titleSearch.value = event.detail.titleSearch;
+  titleSearch.value = event.detail.searchValue.titleSearch;
+  dateSearch.value = event.detail.searchValue.dateSearch;
 
-  const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
-    title: titleSearch.value,
-  });
 
-  const targetChatId = getChatIdOfChatWithTitleResult.data.chats[0].chat_id;
+  if (event.detail.searchKey === 'titleSearch') {
 
-  // keep only the elements of audiosMerged where the chat_id matches targetChatId
-  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-    return audio.chat_id === targetChatId;
-  });
+    searchbarPlaceholder.value = `Titelsuche: [${titleSearch.value}]`
+
+    const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
+      title: titleSearch.value,
+    });
+
+    const targetChatId = getChatIdOfChatWithTitleResult.data.chats[0].chat_id;
+
+    // keep only the elements of audiosMerged where the chat_id matches targetChatId
+    audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+      return audio.chat_id === targetChatId;
+    });
+
+  } else if (event.detail.searchKey === 'dateRangeSearch') {
+
+
+
+
+
+  }
+
+
+
+
 
 
 });
@@ -434,6 +462,12 @@ async function stopRecording() {
 
 function clearSearch() {
   audiosMerged.value = store.getCurrentDialoguePartner.dialogues
+  store.setSearchObject({
+    searchKey: '',
+    searchValue: {
+      titleSearch: '',
+      dateSearch: ''
+    }});
   audiosBackupMerged.value = [];
   searchbarPlaceholder.value = 'Suche ...';
 }

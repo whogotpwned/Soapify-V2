@@ -218,10 +218,7 @@ window.addEventListener('search', async (event: any) => {
     });
   } else if (!event.detail.titelsucheSelected && (event.detail.dateSearchStartingChecked || event.detail.dateSearchEndingChecked)) {
 
-    // TODO: Go on here ...
-    console.log(dateSearch.value);
-
-    searchbarPlaceholder.value = `Datumssuche: [${event.detail.titelSuche}]`
+    searchbarPlaceholder.value = `Datumssuche: [${event.detail.dateSearchStarting} - ${event.detail.dateSearchEnding}]`
 
     const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult = await nhost.graphql.request(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange, {
       user_id: store.getSessionID,
@@ -231,6 +228,15 @@ window.addEventListener('search', async (event: any) => {
     });
 
     console.log(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult);
+
+    const targetChatIds = getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult.data.chats.map((chat: any) => {
+      return chat.chat_id;
+    });
+
+    audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+      // check if chat_id of audio is in targetChatIds
+      return targetChatIds.includes(audio.chat_id);
+    });
   }
 });
 

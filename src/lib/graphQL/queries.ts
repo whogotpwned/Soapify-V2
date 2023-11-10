@@ -134,6 +134,6 @@ export const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange = gq
             _and: {created_at: {_gte: $start}, 
                 _and: {created_at: {_lte: $end}, 
                     _and: {contact: {_eq: $contact}}}}}) {
-            id
+            chat_id
         }
     }`

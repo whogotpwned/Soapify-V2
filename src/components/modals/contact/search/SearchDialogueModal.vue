@@ -37,7 +37,7 @@ ion-content(class="ion-padding")
           ion-col(size="auto")
             input(type="checkbox"  v-model="dateSearchEndingChecked")
           ion-col
-            p Von: {{ dateSearchEnding }}
+            p Bis: {{ dateSearchEnding }}
           ion-col
             ion-datetime-button(datetime='datetimeEnding')
             ion-modal(:keep-contents-mounted='true')

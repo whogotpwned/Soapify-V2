@@ -6,7 +6,7 @@ ion-page
       ion-toolbar(id="dialoguePartnerToolbar")
         div(id="wrapper" v-if="store.getLastActiveChatWasWithID")
           div(id="dialoguePartnerAvatar")
-            ion-avatar
+            ion-avatar(@click="openUserDetailsModal(store.getCurrentDialoguePartner.avatarUrl, store.getCurrentDialoguePartner.user_id, store.getCurrentDialoguePartner.email)")
               img(:src='store.getCurrentDialoguePartner.avatarUrl')
           div(id="dialoguePartnerName")
             ion-title {{ store.currentDialoguePartner.user_id }}
@@ -83,6 +83,7 @@ import {
   getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
 import {createClient} from 'graphql-ws';
+import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 
 const {
   result,
@@ -110,6 +111,18 @@ onIonViewWillEnter(() => {
 });
 
 refreshAllChats();
+
+async function openUserDetailsModal(avatar, user_id, email) {
+  const modal = await modalController.create({
+    component: ShowContactDetailsModal,
+    componentProps: {
+      avatarUrl: avatar,
+      userId: user_id,
+      email: email
+    }
+  })
+  modal.present();
+}
 
 async function refreshAllChats() {
 

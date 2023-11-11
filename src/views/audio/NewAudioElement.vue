@@ -55,6 +55,7 @@
                 <ion-button id="actionSheet" class="ion-align-self-end" size="small" @click="setOpen(true)">
                   <ion-action-sheet
                       :buttons="actionSheetButtons"
+                      @didDismiss="setOpen(false)"
                       :is-open="isOpen"
                       header="Actions"
 

@@ -18,6 +18,13 @@ export const info_toast = Swal.mixin({
     }, showConfirmButton: false, timer: 2500, timerProgressBar: true
 });
 
+export const new_chat_toast = Swal.mixin({
+    toast: true, position: 'top-right', iconColor: 'green', customClass: {
+        popup: 'colored-toast'
+    }, showConfirmButton: false, timer: 1500, timerProgressBar: true
+});
+
+
 export const aufnahmeGestartetToast = Swal.mixin({
     toast: true, position: 'top-right', iconColor: 'green', customClass: {
         popup: 'colored-toast'

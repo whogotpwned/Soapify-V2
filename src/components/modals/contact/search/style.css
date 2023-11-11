@@ -13,3 +13,11 @@ input[type="checkbox"] {
     -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
     transform: scale(1.5);
 }
+
+
+#search-table ion-row {
+    margin-left: 25pt;
+    font-size: 13.5pt;
+}
+
+

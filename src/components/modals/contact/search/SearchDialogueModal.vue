@@ -8,7 +8,7 @@ ion-header
       ion-button(:strong="true" @click="confirm") Suchen
 
 ion-content(class="ion-padding")
-  div
+  div(id="search-table")
     ion-item
       ion-grid
         ion-row

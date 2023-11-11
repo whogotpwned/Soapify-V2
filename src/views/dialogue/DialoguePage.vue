@@ -3,6 +3,8 @@ ion-page
   ion-loading(message="Lade Dialoge ...")
   ion-header
     ion-toolbar
+      ion-buttons(slot="start")
+        ion-menu-button asdasd
       ion-toolbar(id="dialoguePartnerToolbar")
         div(id="wrapper" v-if="store.getLastActiveChatWasWithID")
           div(id="dialoguePartnerAvatar")
@@ -18,7 +20,12 @@ ion-page
       ion-button(id="deleteAllCheckedBoxes" fill="clear" @click="deleteMarkedCheckboxes") Ausgewählte Elemente löschen
         ion-icon(slot="end")
 
-  ion-content(:fullscreen="true")
+
+
+  ion-content(:fullscreen="true" id="dialoguePage")
+
+
+
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -35,17 +42,19 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
-  ion-footer
-    ion-toolbar
-      div(v-if="store.currentDialoguePartner.user_id")
-        div(v-if="!isRecording")
-          ion-button(id="recordingButton" shape="round" @click="startRecording()")
-            ion-icon(slot="icon-only" :icon="recordingOutline")
-        div(v-else)
-          ion-button(id="recordingButton" shape="round" @click="stopRecording()")
-            ion-icon(slot="icon-only" :icon="stopCircleOutline")
+  div
+    ion-footer(id="footer")
+      ion-toolbar(id="footerToolbar")
+
+        div(v-if="store.currentDialoguePartner.user_id")
+          div(v-if="!isRecording")
+            ion-button(id="recordingButton" shape="round" @click="startRecording()")
+              ion-icon(slot="icon-only" :icon="recordingOutline")
+          div(v-else)
+            ion-button(id="recordingButton" shape="round" @click="stopRecording()")
+              ion-icon(slot="icon-only" :icon="stopCircleOutline")
 </template>
 
 <script lang="ts" setup>
@@ -56,7 +65,7 @@ import {useSpeechRecognition} from '@vueuse/core'
 import {v4 as uuidv4} from 'uuid';
 import Modal from "@/components/modals/contact/search/SearchDialogueModal.vue";
 import _ from 'lodash';
-import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
+import {success_toast, error_toast, aufnahmeGestartetToast, info_toast, new_chat_toast} from "@/views/toasts/messages";
 import {
   IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
   IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter
@@ -64,7 +73,7 @@ import {
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import AudioElement from "@/components/audio/AudioElement.vue";
 import {VoiceRecorder} from "capacitor-voice-recorder";
-import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
+import {recordingOutline, stopCircleOutline, trash, caretDownOutline} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
@@ -104,7 +113,7 @@ const dateSearch = ref('');
 const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
-
+const receivedNewMessage = ref(false);
 
 onIonViewWillEnter(() => {
   refreshAllChats();
@@ -345,6 +354,16 @@ onMounted(async () => {
     }
   }, {
     next(data) {
+
+      const fireNotificationAndShowScrollDownArrow = () => {
+        new_chat_toast.fire({
+          icon: 'info',
+          title: 'Neue Nachricht'
+        });
+        receivedNewMessage.value = true;
+      };
+
+
       const lastDialogue = data.data.chats[0];
 
       if (!lastDialogue) return;
@@ -357,6 +376,8 @@ onMounted(async () => {
       } else {
         audiosMerged.value.push(lastDialogue);
         store.addDialogueToCurrentDialoguePartner(lastDialogue);
+
+        fireNotificationAndShowScrollDownArrow();
       }
     },
     complete() {
@@ -456,7 +477,7 @@ async function stopRecording() {
     chat_id: generatedChatId,
     created_at: getCurrentDateTimestamp(),
     senderAvatar: store.getAvatarURL,
-    record: audioBase64,
+    audio: audioBase64,
     title: title,
     sentByMe: true,
     spokenText: result.value,

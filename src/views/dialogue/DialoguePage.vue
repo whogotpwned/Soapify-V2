@@ -40,9 +40,12 @@ ion-page
 
     ExploreContainer(name="Tab 1 page")
 
-    div(v-if="store.lastActiveChatWasWithID")
-      div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
-        AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+    ion-list
+      div(v-if="store.lastActiveChatWasWithID")
+        div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
+          ion-item
+            AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+
 
   div
     ion-footer(id="footer")
@@ -58,7 +61,7 @@ ion-page
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref, watch, watchEffect} from 'vue'
+import {onMounted, reactive, ref, watch, watchEffect} from 'vue'
 import {modalController, onIonViewWillEnter} from "@ionic/vue";
 import Swal from "sweetalert2";
 import {useSpeechRecognition} from '@vueuse/core'

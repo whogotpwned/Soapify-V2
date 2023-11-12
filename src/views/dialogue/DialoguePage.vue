@@ -35,7 +35,10 @@ ion-page
 
     div(v-if="store.lastActiveChatWasWithID")
       div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe" :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+        NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+          :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title"
+          :checkboxVisible="checkboxVisible")
+
 
   ion-footer
     ion-toolbar
@@ -72,7 +75,7 @@ import {
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {VoiceRecorder} from "capacitor-voice-recorder";
-import {recordingOutline, stopCircleOutline, trash} from 'ionicons/icons';
+import {recordingOutline, stopCircleOutline, trash, trendingDown} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
@@ -107,7 +110,7 @@ const searchTerm = ref('');
 const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
-
+const checkboxVisible = ref(false);
 
 const showLoading = async () => {
   const loading = await loadingController.create({
@@ -288,6 +291,12 @@ window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
     audioElementsToBeDeleted.value.push(targetID)
   }
 });
+
+window.addEventListener('checkboxVisibilityState', (event: any) => {
+  checkboxVisible.value = true;
+  console.log("Listened auf Event")
+  console.log(checkboxVisible.value)
+})
 
 function deleteMarkedCheckboxes() {
   Swal.fire({

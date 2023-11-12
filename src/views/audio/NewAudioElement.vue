@@ -83,26 +83,26 @@
 
             </ion-row>
 
-
-            <!--
             <ion-row id="firstRow">
 
               <ion-col size="auto">
-                <ion-item class="checkboxItem">
-                  <ion-checkbox v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
-                </ion-item>
-              </ion-col>
-
-              <ion-col>x
-                <ion-button fill="outline">EDIT</ion-button>
-              </ion-col>
-            </ion-row>
-
-
-
-                              @didDismiss="setOpen(false)"
-
+                <!--
+                <div v-if="!isChecked && isSender">
+                  <ion-button :icon="trashBinOutline" id="deleteButton" fill="clear" @click="deleteElement(id)">Del
+                  </ion-button>
+                </div>
                 -->
+
+
+                <div v-if="checkboxVisible" >
+                  <ion-item class="checkboxItem">
+                  <ion-checkbox v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
+                  </ion-item>
+                </div>
+
+              </ion-col>
+
+            </ion-row>
 
           </ion-grid>
         </ion-card-content>
@@ -149,7 +149,8 @@ const props = defineProps({
   title: String,
   senderAvatar: String,
   isSender: Boolean,
-  audiosMerged: []
+  audiosMerged: [],
+  checkboxVisible: Boolean
 });
 
 const store = userSessionStore();
@@ -158,6 +159,7 @@ let localTitle = ref(props.title);
 let isChecked = ref(false);
 const isOpen = ref(false);
 const message = ref('');
+const markToDelete = ref(false);
 
 const kopiertToast = Swal.mixin({
   toast: true,
@@ -184,24 +186,27 @@ const openEditDetailsModel = async () => {
   await modal.present();
 }
 
+  const actionSheetButtons = [
+    {
+      text: 'EDIT DETAILS',
+      handler: () => {
+        openEditDetailsModel();
+      }
+    },
+    {
+      text: 'MARK TO DELETE',
+      handler: () => {
+        const event = new CustomEvent('checkboxVisibilityState')
+        window.dispatchEvent(event)
+      }
 
-const actionSheetButtons = [
-  {
-    text: 'EDIT DETAILS',
-    handler: () => {
+    },
+    {
+      text: 'TRANSSCRIPT'
+    }
+  ];
 
-      openEditDetailsModel();
-    }
-  },
-  {
-    text: 'MARK TO DELETE',
-    handler: () => {
-    }
-  },
-  {
-    text: 'TRANSSCRIPT'
-  }
-];
+
 
 const setOpen = (state: boolean) => {
   isOpen.value = state;

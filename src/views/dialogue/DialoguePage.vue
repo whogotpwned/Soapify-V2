@@ -367,22 +367,36 @@ async function stopRecording() {
     user_id: store.getSessionID,
   });
 
-  const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
-
-  const newAudioElement = {
-    chat_id: generatedChatId,
-    created_at: getCurrentDateTimestamp(),
-    senderAvatar: store.getAvatarURL,
-    record: audioBase64,
+  console.log({
+    audio: audioBase64,
+    contact: store.getCurrentDialoguePartner.user_id,
     title: title,
-    sentByMe: true,
-    spokenText: result.value,
-    chips: []
+    speech_to_text: result.value,
+    chips: [],
+    user_id: store.getSessionID,
+  })
+
+  console.log(insertNewDialogueResult)
+
+  if(insertNewDialogueResult.data) {
+    const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
+
+    const newAudioElement = {
+      chat_id: generatedChatId,
+      created_at: getCurrentDateTimestamp(),
+      senderAvatar: store.getAvatarURL,
+      record: audioBase64,
+      title: title,
+      sentByMe: true,
+      spokenText: result.value,
+      chips: []
+    }
+
+    audiosMerged.value.push(newAudioElement);
+
+    store.addDialogueToCurrentDialoguePartner(newAudioElement);
   }
 
-  audiosMerged.value.push(newAudioElement);
-
-  store.addDialogueToCurrentDialoguePartner(newAudioElement);
 }
 
 function clearSearch() {

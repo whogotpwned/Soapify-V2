@@ -380,11 +380,15 @@ onMounted(async () => {
       if (audiosMerged.value.some((audio: any) => {
         return audio.chat_id === lastDialogue.chat_id;
       })) {
-        console.log("Nothing to update :)");
+        console.log("Nothing to update for audios :)");
       } else {
         audiosMerged.value.push(lastDialogue);
-        store.addDialogueToCurrentDialoguePartner(lastDialogue);
 
+        if (!store.getCurrentDialoguePartner.dialogues.some((audio: any) => {
+          return audio.chat_id === lastDialogue.chat_id;
+        })) {
+          store.addDialogueToCurrentDialoguePartner(lastDialogue);
+        }
         fireNotificationAndShowScrollDownArrow();
       }
     },

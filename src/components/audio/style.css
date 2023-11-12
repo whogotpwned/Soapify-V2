@@ -103,3 +103,9 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     margin-bottom: 10pt;
 
 }
+
+#dialogueTimestamp p {
+    font-size: 8pt;
+    color: #ffffff;
+    margin-top: 10px;
+}

@@ -1,9 +1,10 @@
 <template lang="pug">
 div(id="wrapper")
 
+
+
   div(:class="{audioIsSender: isSender, audioIsReceived: !isSender}")
     ion-card(:id="id")
-
       div(v-if="!isChecked && isSender" )
         ion-button(id="deleteButton" fill="clear" @click="deleteElement(id)") Del
           ion-icon(slot="end" :icon="trashBinOutline")
@@ -47,6 +48,10 @@ div(id="wrapper")
             AVBars(:bar-color="['#f00', '#ff0', '#0f0']" :caps-height="2"
               :src="`data:audio/wav;base64,${path}`" canv-fill-color='#000'
               caps-color='#FFF' type="audio/mpeg")
+
+  div(id="dialogueTimestamp")
+    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }}
+
 </template>
 
 <script lang="ts" setup>
@@ -71,7 +76,8 @@ const props = defineProps({
   aChips: [],
   title: String,
   senderAvatar: String,
-  isSender: Boolean
+  isSender: Boolean,
+  created_at: String
 });
 
 const store = userSessionStore();
@@ -93,6 +99,24 @@ const kopiertToast = Swal.mixin({
   timer: 1500,
   timerProgressBar: true
 });
+
+
+function getHumanReadableTimestampFromCreatedAt(createdAt: string) {
+  const date = new Date(createdAt);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+
+  // if date is not today also split date into day, month and year
+  if (date.getDate() !== new Date().getDate()) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  }
+  
+  return `${hours}:${minutes}:${seconds}`;
+}
 
 function addChip(id: string) {
   checkIfTagExists(specificChip.value).then((exists) => {

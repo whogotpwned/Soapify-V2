@@ -121,6 +121,14 @@ onIonViewWillEnter(() => {
 
 refreshAllChats();
 
+watch(() => audiosMerged.value, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    audiosMerged.value.sort((a, b) => {
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+  }
+});
+
 async function openUserDetailsModal(avatar, user_id, email) {
   const modal = await modalController.create({
     component: ShowContactDetailsModal,

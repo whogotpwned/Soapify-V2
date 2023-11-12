@@ -55,10 +55,9 @@ div(id="wrapper")
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import {IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
         IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput} from '@ionic/vue';
-
 import {heart, trashBinOutline} from 'ionicons/icons';
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
@@ -101,6 +100,8 @@ const kopiertToast = Swal.mixin({
 });
 
 
+
+
 function getHumanReadableTimestampFromCreatedAt(createdAt: string) {
   const date = new Date(createdAt);
   const hours = date.getHours();
@@ -114,7 +115,7 @@ function getHumanReadableTimestampFromCreatedAt(createdAt: string) {
     const year = date.getFullYear();
     return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
   }
-  
+
   return `${hours}:${minutes}:${seconds}`;
 }
 

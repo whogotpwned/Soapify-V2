@@ -36,6 +36,7 @@ div(id="wrapper")
                   ion-chip(color="tertiary" @click="deleteChip(id, chip)") {{ chip }}
 
       ion-card-content
+
         div(id="audio-element-with-spoken-text")
           ion-accordion-group
             ion-accordion(value="first")
@@ -44,10 +45,17 @@ div(id="wrapper")
                 ion-button(id="kopierenButton" @click="copySpokenToClipboard(spoken)") Kopieren
               div(slot="content" class="ion-padding") {{ spoken }}
 
-          div(id="audio-element" class="container")
-            AVBars(:bar-color="['#f00', '#ff0', '#0f0']" :caps-height="2"
-              :src="`data:audio/wav;base64,${path}`" canv-fill-color='#000'
-              caps-color='#FFF' type="audio/mpeg")
+
+
+
+          ion-grid
+            ion-row
+              ion-col(size='40%')
+                ion-button(id="playPauseButton" @click="playPauseAudio" size="large")
+                  ion-icon(slot="icon-only" :icon="playPauseButtonIcon")
+              ion-col(size='60%')
+                div(:id="containerId" @click="playPauseAudio")
+
 
   div(id="dialogueTimestamp")
     p {{ getHumanReadableTimestampFromCreatedAt(created_at) }}
@@ -55,14 +63,16 @@ div(id="wrapper")
 </template>
 
 <script lang="ts" setup>
-import {ref, watch} from 'vue'
-import {IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
-        IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput} from '@ionic/vue';
-import {heart, trashBinOutline} from 'ionicons/icons';
+import {onMounted, ref, watch} from 'vue'
+import {
+  IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
+  IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput
+} from '@ionic/vue';
+import {heart, trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
 import {updateTitleInChatsTable} from "@/lib/graphQL/mutations";
-
+import WaveSurfer from "wavesurfer.js";
 import Swal from 'sweetalert2';
 import copy from 'copy-to-clipboard';
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
@@ -79,12 +89,16 @@ const props = defineProps({
   created_at: String
 });
 
+const wavesurfer = ref();
+
 const store = userSessionStore();
+const playPauseButtonIcon = ref(playCircleOutline);
 
 const chips = ref([]);
 let specificChip = ref('');
 let localTitle = ref(props.title);
 let isChecked = ref(false);
+const containerId = ref();
 
 
 const kopiertToast = Swal.mixin({
@@ -99,8 +113,64 @@ const kopiertToast = Swal.mixin({
   timerProgressBar: true
 });
 
+function playPauseAudio() {
+  try {
+    wavesurfer.value.playPause();
+
+  } catch (e) {
+    console.log(e);
+  } finally {
+    if (wavesurfer.value.isPlaying()) {
+      playPauseButtonIcon.value = stopCircleOutline;
 
 
+
+    } else {
+      playPauseButtonIcon.value = playCircleOutline;
+    }
+  }
+
+}
+
+
+function uuidObjectToString(uuidObject) {
+  // Check if the object has a property with the actual UUID string
+  if (uuidObject && uuidObject.uuid) {
+    return uuidObject.uuid.toString();
+  }
+
+  // If no uuid property found, return the original object as a string
+  return uuidObject.toString();
+}
+
+onMounted(async () => {
+
+
+  const setContainerIdPromise = new Promise((resolve, reject) => {
+    containerId.value = 'C' + uuidObjectToString(props.id).toString().replaceAll('-', '');
+    resolve(containerId.value);
+  });
+
+
+  setContainerIdPromise.then(() => {
+
+    wavesurfer.value = WaveSurfer.create({
+      container: '#' + containerId.value,
+      waveColor: '#0E61B4',
+      progressColor: '#30A5E0',
+      fillParent: true,
+      minPxPerSec: 35,
+      height: 85,
+      cursor: true,
+      responsive: true,
+    });
+
+    // use wavesurfer to load audio in props.path which is a base64 encoded string
+    wavesurfer.value.load(`data:audio/wav;base64,${props.path}`);
+  })
+
+
+})
 
 function getHumanReadableTimestampFromCreatedAt(createdAt: string) {
   const date = new Date(createdAt);

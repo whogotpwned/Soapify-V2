@@ -24,8 +24,6 @@ ion-page
 
   ion-content(:fullscreen="true" id="dialoguePage")
 
-
-
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -118,6 +116,7 @@ const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 const receivedNewMessage = ref(false);
 
+
 onIonViewWillEnter(() => {
   refreshAllChats();
 });
@@ -143,6 +142,7 @@ async function openUserDetailsModal(avatar, user_id, email) {
   })
   modal.present();
 }
+
 
 async function refreshAllChats() {
 

@@ -109,3 +109,7 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     color: #ffffff;
     margin-top: 10px;
 }
+
+#playPauseButton {
+    margin-top:15px
+}

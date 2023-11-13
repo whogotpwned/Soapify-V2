@@ -50,11 +50,11 @@ div(id="wrapper")
                   ion-grid
                     ion-row
                       ion-col(size='10px')
-                        p(:id="wavewurferCurrentTimeId") 0.00
+                        p(:id="wavewurferCurrentTimeId") Current: 0.00s
                       ion-col(size='10px')
-                        p(:id="wavesurferTotalTimeId") 0.00
+                        p(:id="wavesurferTotalTimeId") Total: 0.00s
                       ion-col(size='10px')
-                        p(:id="wavewurferRemainingTimeId") 0.00
+                        p(:id="wavewurferRemainingTimeId") Remaining: 0.00s
 
 
   div(id="dialogueTimestamp")

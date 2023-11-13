@@ -23,7 +23,7 @@ div(id="wrapper")
                 div(id="titleAndTags")
                   ion-input(label-placement='floating' v-model="localTitle" :value="localTitle" @keyup.enter="changeTitle(id)")
                     div(slot='label')
-                      ion-text(color='danger') Titel
+                      ion-text(color='danger') Titel:
 
                   input(v-model="specificChip" @keyup.space="addChip(id)")
 
@@ -58,7 +58,7 @@ div(id="wrapper")
 
 
   div(id="dialogueTimestamp")
-    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }}
+    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr
 
 </template>
 

@@ -1,8 +1,5 @@
 <template lang="pug">
 div(id="wrapper")
-
-
-
   div(:class="{audioIsSender: isSender, audioIsReceived: !isSender}")
     ion-card(:id="id")
       div(v-if="!isChecked && isSender" )
@@ -21,8 +18,6 @@ div(id="wrapper")
           ion-accordion(value="first")
             ion-item(slot="header" color="light") Details
 
-
-
             div(slot="content" class="ion-padding")
               ion-text
                 div(id="titleAndTags")
@@ -36,7 +31,6 @@ div(id="wrapper")
                   ion-chip(color="tertiary" @click="deleteChip(id, chip)") {{ chip }}
 
       ion-card-content
-
         div(id="audio-element-with-spoken-text")
           ion-accordion-group
             ion-accordion(value="first")
@@ -45,9 +39,6 @@ div(id="wrapper")
                 ion-button(id="kopierenButton" @click="copySpokenToClipboard(spoken)") Kopieren
               div(slot="content" class="ion-padding") {{ spoken }}
 
-
-
-
           ion-grid
             ion-row
               ion-col(size='40%')
@@ -55,7 +46,6 @@ div(id="wrapper")
                   ion-icon(slot="icon-only" :icon="playPauseButtonIcon")
               ion-col(size='60%')
                 div(:id="containerId" @click="playPauseAudio")
-
 
   div(id="dialogueTimestamp")
     p {{ getHumanReadableTimestampFromCreatedAt(created_at) }}
@@ -122,14 +112,10 @@ function playPauseAudio() {
   } finally {
     if (wavesurfer.value.isPlaying()) {
       playPauseButtonIcon.value = stopCircleOutline;
-
-
-
     } else {
       playPauseButtonIcon.value = playCircleOutline;
     }
   }
-
 }
 
 
@@ -144,16 +130,12 @@ function uuidObjectToString(uuidObject) {
 }
 
 onMounted(async () => {
-
-
   const setContainerIdPromise = new Promise((resolve, reject) => {
     containerId.value = 'C' + uuidObjectToString(props.id).toString().replaceAll('-', '');
     resolve(containerId.value);
   });
 
-
   setContainerIdPromise.then(() => {
-
     wavesurfer.value = WaveSurfer.create({
       container: '#' + containerId.value,
       waveColor: '#0E61B4',
@@ -164,12 +146,9 @@ onMounted(async () => {
       cursor: true,
       responsive: true,
     });
-
     // use wavesurfer to load audio in props.path which is a base64 encoded string
     wavesurfer.value.load(`data:audio/wav;base64,${props.path}`);
   })
-
-
 })
 
 function getHumanReadableTimestampFromCreatedAt(createdAt: string) {

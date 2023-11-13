@@ -141,6 +141,7 @@ import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {userSessionStore} from "@/lib/store/userSession";
 import EditDetailsModal from "@/components/modals/audio/EditDetailsModal.vue";
 import {getChipsOfChatId} from "@/lib/graphQL/queries";
+import TransscriptModal from "@/components/modals/audio/TransscriptModal.vue";
 
 const props = defineProps({
   path: String,
@@ -159,7 +160,6 @@ let localTitle = ref(props.title);
 let isChecked = ref(false);
 const isOpen = ref(false);
 const message = ref('');
-const markToDelete = ref(false);
 
 const kopiertToast = Swal.mixin({
   toast: true,
@@ -186,6 +186,16 @@ const openEditDetailsModel = async () => {
   await modal.present();
 }
 
+const openTransscriptModal = async () => {
+
+  const modal = await modalController.create({
+    component: TransscriptModal,
+    componentProps: {
+    }
+  });
+  await modal.present();
+}
+
   const actionSheetButtons = [
     {
       text: 'EDIT DETAILS',
@@ -202,7 +212,10 @@ const openEditDetailsModel = async () => {
 
     },
     {
-      text: 'TRANSSCRIPT'
+      text: 'TRANSSCRIPT',
+      handler: () => {
+        openTransscriptModal();
+      }
     }
   ];
 

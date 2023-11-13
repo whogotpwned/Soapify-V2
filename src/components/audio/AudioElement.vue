@@ -47,6 +47,16 @@ div(id="wrapper")
               ion-col(size='60%')
                 div(:id="containerId" @click="playPauseAudio")
 
+                  ion-grid
+                    ion-row
+                      ion-col(size='10px')
+                        p(:id="wavewurferCurrentTimeId") 0.00
+                      ion-col(size='10px')
+                        p(:id="wavesurferTotalTimeId") 0.00
+                      ion-col(size='10px')
+                        p(:id="wavewurferRemainingTimeId") 0.00
+
+
   div(id="dialogueTimestamp")
     p {{ getHumanReadableTimestampFromCreatedAt(created_at) }}
 
@@ -80,6 +90,9 @@ const props = defineProps({
 });
 
 const wavesurfer = ref();
+const wavesurferTotalTimeId = ref();
+const wavewurferCurrentTimeId = ref();
+const wavewurferRemainingTimeId = ref();
 
 const store = userSessionStore();
 const playPauseButtonIcon = ref(playCircleOutline);
@@ -116,6 +129,24 @@ function playPauseAudio() {
       playPauseButtonIcon.value = playCircleOutline;
     }
   }
+
+  const totalTime = wavesurfer.value.getDuration(),
+      currentTime = wavesurfer.value.getCurrentTime(),
+      remainingTime = totalTime - currentTime;
+
+
+    const setDynamicIDsForAudioStatistics = new Promise((resolve, reject) => {
+      wavesurferTotalTimeId.value = `#${containerId.value}-time-total`;
+      wavewurferCurrentTimeId.value = `#${containerId.value}-time-current`;
+      wavewurferRemainingTimeId.value = `#${containerId.value}-time-remaining`;
+      resolve((wavesurferTotalTimeId.value, wavewurferCurrentTimeId.value, wavewurferRemainingTimeId.value));
+    });
+
+    setDynamicIDsForAudioStatistics.then(() => {
+      document.getElementById(wavesurferTotalTimeId.value).innerText = "Total: " + totalTime.toFixed(1) + "s";
+      document.getElementById(wavewurferCurrentTimeId.value).innerText = "Current: " + currentTime.toFixed(1) + "s";
+      document.getElementById(wavewurferRemainingTimeId.value).innerText = "Remaining: " + remainingTime.toFixed(1) + "s";
+    });
 }
 
 function uuidObjectToString(uuidObject) {
@@ -148,6 +179,8 @@ onMounted(async () => {
     // use wavesurfer to load audio in props.path which is a base64 encoded string
     wavesurfer.value.load(`data:audio/wav;base64,${props.path}`);
   })
+
+
 })
 
 function getHumanReadableTimestampFromCreatedAt(createdAt: string) {

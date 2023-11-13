@@ -111,5 +111,5 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
 }
 
 #playPauseButton {
-    margin-top:15px
+    padding-top: 50px;
 }

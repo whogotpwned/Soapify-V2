@@ -118,7 +118,6 @@ function playPauseAudio() {
   }
 }
 
-
 function uuidObjectToString(uuidObject) {
   // Check if the object has a property with the actual UUID string
   if (uuidObject && uuidObject.uuid) {

@@ -3,7 +3,7 @@ div(id="wrapper")
   div(:class="{audioIsSender: isSender, audioIsReceived: !isSender}")
     ion-card(:id="id")
       ion-item
-        ion-checkbox(v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted")
+        ion-checkbox(v-if="isSender" v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted")
 
       ion-card-header
         div(id="element-id")

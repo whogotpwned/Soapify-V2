@@ -2,10 +2,6 @@
 div(id="wrapper")
   div(:class="{audioIsSender: isSender, audioIsReceived: !isSender}")
     ion-card(:id="id")
-      div(v-if="!isChecked && isSender" )
-        ion-button(id="deleteButton" fill="clear" @click="deleteElement(id)") Del
-          ion-icon(slot="end" :icon="trashBinOutline")
-
       ion-item
         ion-checkbox(v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted")
 
@@ -24,7 +20,6 @@ div(id="wrapper")
                   ion-input(label-placement='floating' v-model="localTitle" :value="localTitle" @keyup.enter="changeTitle(id)")
                     div(slot='label')
                       ion-text(color='danger') Titel:
-
                   input(v-model="specificChip" @keyup.space="addChip(id)")
 
                 ion-item(v-for="chip in aChips" id="audioChip")
@@ -68,7 +63,8 @@ import {
   IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
   IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput
 } from '@ionic/vue';
-import {heart, trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
+import {trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
+import {trash, heart, archive} from "ionicons/icons";
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
 import {updateTitleInChatsTable} from "@/lib/graphQL/mutations";
@@ -263,37 +259,7 @@ async function changeTitle(id: string) {
   store.updateDialogueTitleOfDialogueWithId(id, localTitle.value);
 }
 
-function deleteElement(id: string) {
-  Swal.fire({
-    title: 'Element wirklich unwiderruflich löschen?',
-    showCancelButton: true,
-    confirmButtonText: 'Löschen',
-    denyButtonText: `Don't save`,
-    heightAuto: false
-  }).then((result) => {
-    /* Read more chats isConfirmed, isDenied below */
-    if (result.isConfirmed) {
-      try {
-        // send event to parent component DialoguePage.vue to delete element from audios array
-        const event = new CustomEvent('deleteElement', {
-          detail: {
-            id: id
-          },
-        });
-        window.dispatchEvent(event);
-        // document.getElementById(id).remove();
-      } catch (e) {
-        Swal.fire({
-          title: 'Fehler :(',
-          text: 'Löschen fehlerhaft',
-          icon: 'error',
-          confirmButtonText: 'Cool',
-          heightAuto: false
-        })
-      }
-    }
-  });
-}
+
 
 function markCheckboxesToBeDeleted() {
   const event = new CustomEvent('markCheckboxesToBeDeleted', {

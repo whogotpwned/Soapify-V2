@@ -16,7 +16,7 @@ ion-item-sliding
   ion-item-options(side='end')
     ion-item-option
       ion-icon(slot='icon-only' :icon='heart')
-    ion-item-option(color='danger' @click="deleteElement(user_id)")
+    ion-item-option(color='danger' @click="deleteContactElement(user_id)")
       ion-icon(slot='icon-only' :icon='trash')
 </template>
 
@@ -32,7 +32,6 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import {onLongPress} from "@vueuse/core";
-import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 
 const props = defineProps({
   user: String,
@@ -42,7 +41,6 @@ const props = defineProps({
 });
 
 const store = userSessionStore();
-const avatarExists = ref(false);
 const htmlRef = ref<HTMLElement | null>(null)
 
 function openDialogue(user, user_id, email) {
@@ -83,7 +81,7 @@ function openDialogue(user, user_id, email) {
   }
 }
 
-function deleteElement(user_id) {
+function deleteContactElement(user_id) {
   try {
     const eventDelete = new CustomEvent('deleteUserWithId', {
       detail: {

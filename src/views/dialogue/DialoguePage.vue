@@ -294,8 +294,6 @@ window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
 
 window.addEventListener('checkboxVisibilityState', (event: any) => {
   checkboxVisible.value = true;
-  console.log("Listened auf Event")
-  console.log(checkboxVisible.value)
 })
 
 function deleteMarkedCheckboxes() {
@@ -367,17 +365,6 @@ async function stopRecording() {
     user_id: store.getSessionID,
   });
 
-  console.log({
-    audio: audioBase64,
-    contact: store.getCurrentDialoguePartner.user_id,
-    title: title,
-    speech_to_text: result.value,
-    chips: [],
-    user_id: store.getSessionID,
-  })
-
-  console.log(insertNewDialogueResult)
-
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
 
@@ -392,12 +379,37 @@ async function stopRecording() {
       chips: []
     }
 
+    console.log(
+        {
+          chat_id: generatedChatId,
+          created_at: getCurrentDateTimestamp(),
+          senderAvatar: store.getAvatarURL,
+          record: audioBase64,
+          title: title,
+          sentByMe: true,
+          spokenText: result.value,
+          chips: []
+        }
+    )
+    console.log(result.value)
+
+
     audiosMerged.value.push(newAudioElement);
 
     store.addDialogueToCurrentDialoguePartner(newAudioElement);
   }
 
 }
+
+
+const event = new CustomEvent('sendSpeechToTextResultToTranscriptModal', {
+  detail: {
+    speechToTextResult : result.value
+  }
+})
+window.dispatchEvent(event)
+console.log("rausgeschicktes speechtotextresuuullltttt")
+console.log(result.value)
 
 function clearSearch() {
   audiosMerged.value = audiosBackupMerged.value;

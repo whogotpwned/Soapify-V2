@@ -186,7 +186,7 @@ const openEditDetailsModel = async () => {
   await modal.present();
 }
 
-const openTransscriptModal = async () => {
+const openTranscriptModal = async () => {
 
   const modal = await modalController.create({
     component: TransscriptModal,
@@ -214,7 +214,7 @@ const openTransscriptModal = async () => {
     {
       text: 'TRANSSCRIPT',
       handler: () => {
-        openTransscriptModal();
+        openTranscriptModal();
       }
     }
   ];

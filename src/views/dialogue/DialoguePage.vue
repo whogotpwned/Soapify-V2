@@ -6,7 +6,7 @@ ion-page
       ion-toolbar(id="dialoguePartnerToolbar")
         div(id="wrapper" v-if="store.getLastActiveChatWasWithID")
           div(id="dialoguePartnerAvatar")
-            ion-avatar
+            ion-avatar(@click="openUserDetailsModal(store.getCurrentDialoguePartner.avatarUrl, store.getCurrentDialoguePartner.user_id, store.getCurrentDialoguePartner.email)")
               img(:src='store.getCurrentDialoguePartner.avatarUrl')
           div(id="dialoguePartnerName")
             ion-title {{ store.currentDialoguePartner.user_id }}
@@ -18,7 +18,10 @@ ion-page
       ion-button(id="deleteAllCheckedBoxes" fill="clear" @click="deleteMarkedCheckboxes") Ausgewählte Elemente löschen
         ion-icon(slot="end")
 
-  ion-content(:fullscreen="true")
+
+
+  ion-content(:fullscreen="true" id="dialoguePage")
+
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -33,41 +36,36 @@ ion-page
 
     ExploreContainer(name="Tab 1 page")
 
-    div(v-if="store.lastActiveChatWasWithID")
-      div(v-for="audio in getAudiosMerged()" key="audio.id" id="audioElementsMerged")
-        NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-          :path="audio.record" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title"
-          :checkboxVisible="checkboxVisible")
+    ion-list
+      div(v-if="store.lastActiveChatWasWithID")
+        div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
+          ion-item
+            NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+              :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title"
+              :checkboxVisible="checkboxVisible")
 
+  div
+    ion-footer(id="footer")
+      ion-toolbar(id="footerToolbar")
 
-  ion-footer
-    ion-toolbar
-      div(v-if="store.currentDialoguePartner.user_id")
-        div(v-if="!isRecording")
-          ion-button(id="recordingButton" shape="round" @click="startRecording()")
-            ion-icon(slot="icon-only" :icon="recordingOutline")
-        div(v-else)
-          ion-button(id="recordingButton" shape="round" @click="stopRecording()")
-            ion-icon(slot="icon-only" :icon="stopCircleOutline")
+        div(v-if="store.currentDialoguePartner.user_id")
+          div(v-if="!isRecording")
+            ion-button(id="recordingButton" shape="round" @click="startRecording()")
+              ion-icon(slot="icon-only" :icon="recordingOutline")
+          div(v-else)
+            ion-button(id="recordingButton" shape="round" @click="stopRecording()")
+              ion-icon(slot="icon-only" :icon="stopCircleOutline")
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, reactive, ref, watch, watchEffect} from 'vue'
 import {modalController, onIonViewWillEnter} from "@ionic/vue";
 import Swal from "sweetalert2";
 import {useSpeechRecognition} from '@vueuse/core'
 import {v4 as uuidv4} from 'uuid';
-import Modal from "@/components/modals/contact/search/SearchContactModal.vue";
+import Modal from "@/components/modals/contact/search/SearchDialogueModal.vue";
 import _ from 'lodash';
-import {
-  getAvatarForID,
-  getChatsOfUserWithIDSentToUserWithID,
-  getChipsOfSpecificDialogBetweenUserAndContact,
-  getUserDetailsOfUserWithID,
-  getUserSession,
-  messageSentByMe
-} from "@/lib/supabase/supabaseMethods";
-import {success_toast, error_toast, aufnahmeGestartetToast} from "@/views/toasts/messages";
+import {success_toast, error_toast, aufnahmeGestartetToast, info_toast, new_chat_toast} from "@/views/toasts/messages";
 import {
   IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
   IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter
@@ -75,7 +73,7 @@ import {
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {VoiceRecorder} from "capacitor-voice-recorder";
-import {recordingOutline, stopCircleOutline, trash, trendingDown} from 'ionicons/icons';
+import {recordingOutline, stopCircleOutline, trash, caretDownOutline, trendingDown} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
@@ -87,10 +85,15 @@ import {
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {
   counterNumberOfChatsBetweenIDAndContact,
-  getDialoguesBetweenIDAndContact, getChipsOfChatId, getChipsWithId
+  getDialoguesBetweenIDAndContact,
+  getChipsOfChatId,
+  getChipsWithId,
+  getDialoguesBetweenIDAndContactSubscription,
+  getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
 import {createClient} from 'graphql-sse';
 import NewAudioElement from "@/views/audio/NewAudioElement.vue";
+import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 
 const {
   result,
@@ -106,22 +109,14 @@ const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
 const currentDialoguePartner = ref({});
 const isRecording = ref(false);
-const searchTerm = ref('');
+const titleSearch = ref('');
+const dateSearch = ref('');
 const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
+const receivedNewMessage = ref(false);
 const checkboxVisible = ref(false);
 
-const showLoading = async () => {
-  const loading = await loadingController.create({
-    message: 'Lade Dialoge ...',
-  });
-  loading.present();
-};
-
-const stopLoading = async () => {
-  await loadingController.dismiss();
-};
 
 onIonViewWillEnter(() => {
   refreshAllChats();
@@ -129,9 +124,30 @@ onIonViewWillEnter(() => {
 
 refreshAllChats();
 
+watch(() => audiosMerged.value, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    audiosMerged.value.sort((a, b) => {
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+  }
+});
+
+async function openUserDetailsModal(avatar, user_id, email) {
+  const modal = await modalController.create({
+    component: ShowContactDetailsModal,
+    componentProps: {
+      avatarUrl: avatar,
+      userId: user_id,
+      email: email
+    }
+  })
+  modal.present();
+}
+
+
 async function refreshAllChats() {
 
-  if (!store.currentDialoguePartner.user_id) {
+  if(!store.currentDialoguePartner.user_id) {
     return;
   }
 
@@ -161,15 +177,16 @@ async function refreshAllChats() {
       dialogues[i].chips = [];
 
       chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
+
         dialogues[i].chips.push(chipElement.chip);
       });
     }
 
+
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   } else {
-    console.log("Loading from Store");
-
+    console.log("From Store")
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
 
@@ -184,9 +201,11 @@ async function refreshAllChats() {
     audio.sentByMe = audio.user_id === store.getSessionID;
     return audio;
   });
+
+  audiosMerged.value = getAudiosSortedByCreatedAt();
 }
 
-function getAudiosMerged() {
+function getAudiosSortedByCreatedAt() {
   return audiosMerged.value.sort((a: any, b: any) => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   })
@@ -218,15 +237,41 @@ const openModal = async () => {
 };
 
 
-window.addEventListener('search', (event: any) => {
-  searchTerm.value = event.detail.chipSuche;
-  /* only keep those cards which contain a tag matching chipSuche */
-  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-    return audio.tags.some((tag: any) => {
-      return tag.value.includes(searchTerm.value);
+window.addEventListener('search', async (event: any) => {
+
+  if (event.detail.titelsucheSelected && !event.detail.dateSearchStartingChecked && !event.detail.dateSearchEndingChecked) {
+    searchbarPlaceholder.value = `Titelsuche: [${event.detail.titelSuche}]`
+    const getChatIdOfChatWithTitleResult = await nhost.graphql.request(getChatIdOfChatWithTitle, {
+      title: event.detail.titelSuche,
     });
-  });
-  searchbarPlaceholder.value = `chipSuche:[${event.detail.chipSuche}]`;
+    const targetChatId = getChatIdOfChatWithTitleResult.data.chats[0].chat_id;
+
+    // keep only the elements of audiosMerged where the chat_id matches targetChatId
+    audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+      return audio.chat_id === targetChatId;
+    });
+  } else if (!event.detail.titelsucheSelected && (event.detail.dateSearchStartingChecked || event.detail.dateSearchEndingChecked)) {
+
+    searchbarPlaceholder.value = `Datumssuche: [${event.detail.dateSearchStarting} - ${event.detail.dateSearchEnding}]`
+
+    const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult = await nhost.graphql.request(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange, {
+      user_id: store.getSessionID,
+      contact: store.getCurrentDialoguePartner.user_id,
+      start: event.detail.dateSearchStarting,
+      end: event.detail.dateSearchEnding
+    });
+
+    console.log(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult);
+
+    const targetChatIds = getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult.data.chats.map((chat: any) => {
+      return chat.chat_id;
+    });
+
+    audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+      // check if chat_id of audio is in targetChatIds
+      return targetChatIds.includes(audio.chat_id);
+    });
+  }
 });
 
 
@@ -248,7 +293,7 @@ window.addEventListener('deleteChip', (event: any) => {
       audio.chips = audio.chips.filter((chip: any) => {
         return chip !== event.detail.chip
       });
-
+      
       const deleteChipResult = await nhost.graphql.request(updateChipsInChatsTable, {
         chat_id: event.detail.id,
         chips: audio.chips
@@ -270,13 +315,66 @@ window.addEventListener('deleteElement', async (event: any) => {
   });
 
   store.deleteDialogueWithId(event.detail.id);
-
 });
 
-
 onMounted(async () => {
+  const client = createClient({
+    url: nhost.graphql.wsUrl,
+    connectionParams: () => {
+      const token = nhost.auth.getAccessToken();
+      return {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+    },
+  });
+
+  const subscription = client.subscribe({
+    query: getDialoguesBetweenIDAndContactSubscription,
+    variables: {
+      user_id: store.getCurrentDialoguePartner.user_id,
+      contact: store.getSessionID
+    }
+  }, {
+    next(data) {
+
+      const fireNotificationAndShowScrollDownArrow = () => {
+        new_chat_toast.fire({
+          icon: 'info',
+          title: 'Neue Nachricht'
+        });
+        receivedNewMessage.value = true;
+      };
 
 
+      const lastDialogue = data.data.chats[0];
+
+      if (!lastDialogue) return;
+
+      // check if chat_id of lastDialogue is already in audiosMerged.value and not add id to it
+      if (audiosMerged.value.some((audio: any) => {
+        return audio.chat_id === lastDialogue.chat_id;
+      })) {
+        console.log("Nothing to update for audios :)");
+      } else {
+        audiosMerged.value.push(lastDialogue);
+
+        if (!store.getCurrentDialoguePartner.dialogues.some((audio: any) => {
+          return audio.chat_id === lastDialogue.chat_id;
+        })) {
+          store.addDialogueToCurrentDialoguePartner(lastDialogue);
+        }
+        fireNotificationAndShowScrollDownArrow();
+      }
+    },
+    complete() {
+      console.log('done');
+    },
+    error(e) {
+      console.log(e);
+    },
+  });
 })
 
 window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
@@ -368,51 +466,43 @@ async function stopRecording() {
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
 
-    const newAudioElement = {
-      chat_id: generatedChatId,
-      created_at: getCurrentDateTimestamp(),
-      senderAvatar: store.getAvatarURL,
-      record: audioBase64,
-      title: title,
-      sentByMe: true,
-      spokenText: result.value,
-      chips: []
-    }
-
-    console.log(
-        {
-          chat_id: generatedChatId,
-          created_at: getCurrentDateTimestamp(),
-          senderAvatar: store.getAvatarURL,
-          record: audioBase64,
-          title: title,
-          sentByMe: true,
-          spokenText: result.value,
-          chips: []
-        }
-    )
-    console.log(result.value)
-
-
-    audiosMerged.value.push(newAudioElement);
-
-    store.addDialogueToCurrentDialoguePartner(newAudioElement);
+  const newAudioElement = {
+    chat_id: generatedChatId,
+    created_at: getCurrentDateTimestamp(),
+    senderAvatar: store.getAvatarURL,
+    audio: audioBase64,
+    title: title,
+    sentByMe: true,
+    spokenText: result.value,
+    user_id: store.getSessionID,
+    chips: []
   }
 
+  audiosMerged.value.push(newAudioElement);
+
+  store.addDialogueToCurrentDialoguePartner(newAudioElement);
 }
 
+}
 
 const event = new CustomEvent('sendSpeechToTextResultToTranscriptModal', {
   detail: {
     speechToTextResult : result.value
   }
 })
-window.dispatchEvent(event)
-console.log("rausgeschicktes speechtotextresuuullltttt")
-console.log(result.value)
 
 function clearSearch() {
-  audiosMerged.value = audiosBackupMerged.value;
+  audiosMerged.value = store.getCurrentDialoguePartner.dialogues
+  store.setSearchObject({
+    searchDetails: {
+      titelsucheSelected: false,
+      titelSuche: "",
+      dateSearchStartingChecked: false,
+      dateSearchStarting: "",
+      dateSearchEndingChecked: false,
+      dateSearchEnding: "",
+    }
+  });
   audiosBackupMerged.value = [];
   searchbarPlaceholder.value = 'Suche ...';
 }

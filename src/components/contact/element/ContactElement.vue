@@ -25,7 +25,6 @@ ion-item-sliding
 import {IonButton, IonCard, IonCardHeader, IonCardTitle, IonIcon, modalController} from '@ionic/vue';
 import {trashBinOutline} from "ionicons/icons";
 import router from "@/router";
-import {checkFileExists} from "@/lib/supabase/supabaseMethods";
 import {onMounted, ref} from "vue";
 import {error_toast} from "@/views/toasts/messages";
 import {trash, heart, archive} from "ionicons/icons";
@@ -43,15 +42,8 @@ const props = defineProps({
 });
 
 const store = userSessionStore();
-
 const avatarExists = ref(false);
 const htmlRef = ref<HTMLElement | null>(null)
-
-onMounted(() => {
-  checkIfAvatarExists(props.user_id).then((exists) => {
-    avatarExists.value = exists;
-  });
-})
 
 function openDialogue(user, user_id, email) {
   try {
@@ -65,7 +57,7 @@ function openDialogue(user, user_id, email) {
     const avatarUrlForID = store.getAvatarUrlFromContactInformationForID(user_id);
     const lastAccessTimestamp = getCurrentDateTimestamp();
 
-    if(!store.activeChatsContainChatWithID(user_id)) {
+    if (!store.activeChatsContainChatWithID(user_id)) {
       const currentDialoguePartner = {
         user: user,
         user_id: user_id,
@@ -90,8 +82,6 @@ function openDialogue(user, user_id, email) {
     router.push('/tabs/dialogue');
   }
 }
-
-console.log(nhost.auth.getSession())
 
 function deleteElement(user_id) {
   try {
@@ -125,10 +115,6 @@ const openUserDetailsModal = async (avatar, user_id, email) => {
 onLongPress(htmlRef, () => {
   openUserDetailsModal(props.avatar, props.user_id, props.email);
 })
-
-async function checkIfAvatarExists(id: string) {
-  return await checkFileExists('avatars', id);
-}
 </script>
 
 <style scoped>

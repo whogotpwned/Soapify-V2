@@ -1,11 +1,10 @@
 import {defineStore} from 'pinia';
-import {getContactsOfUserWithId} from "@/lib/supabase/supabaseMethods";
 
 export const userSessionStore = defineStore({
     id: 'soapify', state: () => ({
-        sessionID: '', email: '', avatarURL: '', username: '', contactInformation: [], activeChats: [], lastActiveChatWasWithID: '', accessToken: '', refreshToken: '', currentDialoguePartner: {"dialogues": []}
+        sessionID: '', email: '', avatarURL: '', username: '', contactInformation: [], activeChats: [], lastActiveChatWasWithID: '', accessToken: '', refreshToken: '', currentDialoguePartner: {"dialogues": []}, searchObject: {}
     }), getters: {
-        getSessionID: (state) => state.sessionID, getEmail: (state) => state.email, getAvatarURL: (state) => state.avatarURL, getUsername: (state) => state.username, getContactInformation: (state) => state.contactInformation, getActiveChats: (state) => state.activeChats, getLastActiveChatWasWithID: (state) => state.lastActiveChatWasWithID, getCurrentDialoguePartner: (state) => state.currentDialoguePartner
+        getSessionID: (state) => state.sessionID, getEmail: (state) => state.email, getAvatarURL: (state) => state.avatarURL, getUsername: (state) => state.username, getContactInformation: (state) => state.contactInformation, getActiveChats: (state) => state.activeChats, getLastActiveChatWasWithID: (state) => state.lastActiveChatWasWithID, getCurrentDialoguePartner: (state) => state.currentDialoguePartner, getSearchObject: (state) => state.searchObject
     }, actions: {
         setSessionID(sessionID: string) {
             this.sessionID = sessionID;
@@ -86,7 +85,10 @@ export const userSessionStore = defineStore({
             const objIndex = this.currentDialoguePartner["dialogues"].findIndex((obj => obj["chat_id"] == chat_id));
             return this.getCurrentDialoguePartner["dialogues"][objIndex]["chips"];
 
+        }, setSearchObject(searchObject: object) {
+            this.searchObject = searchObject;
+        }, updateSearchObjectAttribute(attribute: string, value: string) {
+            this.searchObject[attribute] = value;
         }
-
     }, persist: true,
 });

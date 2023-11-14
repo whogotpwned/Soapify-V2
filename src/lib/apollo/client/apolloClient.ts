@@ -2,7 +2,17 @@ import {ApolloClient, createHttpLink, InMemoryCache} from '@apollo/client/core'
 import {setContext} from '@apollo/client/link/context';
 import {createApolloProvider} from '@vue/apollo-option'
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
+import {GraphQLWsLink} from "@apollo/client/link/subscriptions";
+import {createClient} from "graphql-sse";
+import { WebSocketLink } from "@apollo/client/link/ws"
 
+
+// WS connection to the API
+const wsLink = new GraphQLWsLink(
+    createClient({
+        url: nhost.graphql.wsUrl,
+    })
+);
 
 // HTTP connection to the API
 const httpLink = createHttpLink({
@@ -25,11 +35,21 @@ const authLink = setContext((_, {headers}) => {
     }
 });
 
-// Create the apollo client
+// Create the ws apollo client
+const apolloClientWS = new ApolloClient({
+    link: authLink.concat(wsLink), cache,
+})
+
+
+// Create the http apollo client
 const apolloClient = new ApolloClient({
     link: authLink.concat(httpLink), cache,
 })
 
 export const apolloProvider = createApolloProvider({
+    clients: {
+      apolloClientWS,
+      apolloClient,
+    },
     defaultClient: apolloClient,
 })

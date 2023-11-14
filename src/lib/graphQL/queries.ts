@@ -81,6 +81,28 @@ export const getDialoguesBetweenIDAndContact = gql`
     }`
 
 
+export const getDialoguesBetweenIDAndContactSubscription = gql`
+    subscription getDialoguesBetweenIDAndContact($user_id: uuid!, $contact: uuid!){
+        chats(limit: 1, order_by: {id: desc}, where: {
+            user_id: {
+                _eq: $user_id
+            },
+            contact: {
+                _eq: $contact
+            }}) {
+            id
+            user_id
+            title
+            speech_to_text
+            created_at
+            contact
+            chips
+            chat_id
+            audio
+        }
+    }`
+
+
 export const getChipsOfChatId = gql`
     query getChipsOfChatId($chat_id: uuid!){
         chats(where: {chat_id: {_eq: $chat_id}}) {
@@ -93,5 +115,25 @@ export const getChipsWithId = gql`
     query getChipsWithId($ids: [Int!]!) {
         chips(where: {id: {_in: $ids}}) {
             chip
+        }
+    }`
+
+
+export const getChatIdOfChatWithTitle = gql`
+    query getChatIdOfChatWithTitle($title: String!) {
+        chats(where: {title: {_eq: $title}}) {
+            chat_id
+        }
+    }`
+
+
+export const getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange = gql`
+    
+    query getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange($user_id: uuid!, $contact: uuid!, $start: timestamptz!, $end: timestamptz!) {
+        chats(where: {user_id: {_eq: $user_id}, 
+            _and: {created_at: {_gte: $start}, 
+                _and: {created_at: {_lte: $end}, 
+                    _and: {contact: {_eq: $contact}}}}}) {
+            chat_id
         }
     }`

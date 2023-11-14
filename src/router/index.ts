@@ -4,7 +4,6 @@ import TabsPage from '@/views/TabsPage.vue'
 import LoginPage from "@/views/login/LoginPage.vue";
 import {userSessionStore} from "@/lib/store/userSession";
 import RegisterPage from "@/views/register/RegisterPage.vue";
-import {supabase} from "@/lib/supabase/supabaseClient";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import Foobar from "@/views/contacts/Foobar.vue";
 

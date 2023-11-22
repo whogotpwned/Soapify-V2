@@ -45,7 +45,7 @@ ion-page
           ion-item
             AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
               :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-              :checkboxVisible="checkboxVisible")
+              :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
   div
     ion-footer(id="footer")

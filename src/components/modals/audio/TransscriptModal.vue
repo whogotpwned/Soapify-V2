@@ -10,11 +10,6 @@
 
   <ion-content class="ion-padding">
     <div id="audio-element-with-spoken-text">
-
-      ------
-      {{ speech_to_text }}
-      ---
-
       <ion-accordion-group>
         <ion-accordion>
           <ion-item slot="header" color="light">
@@ -34,12 +29,10 @@
 import {IonInput, modalController} from "@ionic/vue";
 import copy from "copy-to-clipboard";
 import Swal from "sweetalert2";
-import {ref} from "vue";
 
 const props = defineProps( {
   speech_to_text: String
 })
-
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 

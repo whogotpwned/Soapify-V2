@@ -305,9 +305,7 @@ window.addEventListener('search', async (event: any) => {
       start: event.detail.dateSearchStarting,
       end: event.detail.dateSearchEnding
     });
-
-    console.log(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult);
-
+    
     const targetChatIds = getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult.data.chats.map((chat: any) => {
       return chat.chat_id;
     });

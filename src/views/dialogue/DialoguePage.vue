@@ -14,8 +14,11 @@ ion-page
       ion-searchbar(id="open-modal" :cancel-button-icon="trash" :placeholder="searchbarPlaceholder"
         show-cancel-button="always" @ionCancel="clearSearch" @ionFocus="openModal")
 
-    div(v-if="audioElementsToBeDeleted.length > 0")
+    div(v-if="audioElementsToBeDeleted.length > 0 && checkboxVisible")
       ion-button(id="deleteAllCheckedBoxes" fill="clear" @click="deleteMarkedCheckboxes") Ausgewählte Elemente löschen
+        ion-icon(slot="end")
+    div(v-if="checkboxVisible")
+      ion-button(id="dismissMarkToDelete" fill="clear" @click="checkboxVisible=false") Cancel
         ion-icon(slot="end")
 
 
@@ -425,6 +428,8 @@ function deleteMarkedCheckboxes() {
           confirmButtonText: 'Cool',
           heightAuto: false
         })
+      } finally {
+        checkboxVisible.value =false
       }
     }
   });
@@ -485,16 +490,6 @@ async function stopRecording() {
 }
 
 }
-/*
-
-const event = new CustomEvent('sendSpeechToTextResultToTranscriptModal', {
-  detail: {
-    spokenText: result.value
-  }
-})
-window.dispatchEvent(event)
-*/
-
 
 function clearSearch() {
   audiosMerged.value = store.getCurrentDialoguePartner.dialogues

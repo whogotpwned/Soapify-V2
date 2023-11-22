@@ -42,6 +42,7 @@
                   <ion-action-sheet
                       :buttons="actionSheetButtons"
                       :is-open="isOpen"
+                      @didDismiss="setOpen(false)"
                       header="Actions"
 
                   ></ion-action-sheet>
@@ -63,29 +64,15 @@
               <ion-col size="auto">
                 <div v-if="checkboxVisible" >
                   <ion-item class="checkboxItem">
-                    <ion-checkbox v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
+                    <ion-checkbox label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
                   </ion-item>
                 </div>
               </ion-col>
             </ion-row>
           </ion-grid>
 
-
-          ------
-          {{ spoken }}
-          ---
-
-
           <div id="audio-element-with-spoken-text">
-            <ion-accordion-group>
-              <ion-accordion value="first">
-                <ion-item slot="header" color="light">
-                  <ion-label>Transkript</ion-label>
-                  <ion-button id="kopierenButton" @click="copySpokenToClipboard(spoken)">Kopieren</ion-button>
-                </ion-item>
-                <div class="ion-padding" slot="content">{{ spoken }}</div>
-              </ion-accordion>
-            </ion-accordion-group>
+
             <ion-grid>
               <ion-row>
                 <ion-col size="40%">
@@ -153,6 +140,7 @@ const props = defineProps({
   checkboxVisible: Boolean
 });
 
+
 const wavesurfer = ref();
 const wavesurferTotalTimeId = ref();
 const wavewurferCurrentTimeId = ref();
@@ -199,7 +187,7 @@ const openTranscriptModal = async () => {
   const modal = await modalController.create({
     component: TransscriptModal,
     componentProps: {
-      spoken: props.spoken
+      speech_to_text: props.spoken
     }
   });
   await modal.present();
@@ -217,6 +205,7 @@ const actionSheetButtons = [
     handler: () => {
       const event = new CustomEvent('checkboxVisibilityState')
       window.dispatchEvent(event)
+
     }
 
   },
@@ -224,12 +213,6 @@ const actionSheetButtons = [
     text: 'TRANSSCRIPT',
     handler: () => {
       openTranscriptModal();
-      const event = new CustomEvent('speechToText', {
-        detail: {
-          speech_to_text: props.spoken
-        }
-      })
-      window.dispatchEvent(event)
     }
   }
 ];

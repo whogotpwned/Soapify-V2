@@ -12,16 +12,16 @@
     <div id="audio-element-with-spoken-text">
 
       ------
-      {{ spoken }}
+      {{ speech_to_text }}
       ---
 
       <ion-accordion-group>
         <ion-accordion>
           <ion-item slot="header" color="light">
             <ion-label>Transcript</ion-label>
-            <ion-button id="kopierenButton" @click="copySpokenToClipboard(spoken)">Copy</ion-button>
+            <ion-button id="kopierenButton" @click="copySpokenToClipboard(speech_to_text)">Copy</ion-button>
           </ion-item>
-          <div slot="content" class="ion-padding">{{spoken}}</div>
+          <div slot="content" class="ion-padding">{{speech_to_text}}</div>
         </ion-accordion>
       </ion-accordion-group>
     </div>
@@ -36,12 +36,10 @@ import copy from "copy-to-clipboard";
 import Swal from "sweetalert2";
 import {ref} from "vue";
 
-
 const props = defineProps( {
-  spoken: String
+  speech_to_text: String
 })
 
-const spoken = ref();
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 
@@ -71,15 +69,5 @@ function copySpokenToClipboard(spoken: string) {
     })
   }
 }
-
-/*window.addEventListener('speechToText', (event: any) => {
-  spoken.value = event.detail.spokenText
-})*/
-
-/*
-window.addEventListener('sendSpeechToTextResultToTranscriptModal', (event: any) => {
-  spoken.value = event.detail.spokenText
-})
-*/
 
 </script>

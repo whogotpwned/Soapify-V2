@@ -91,7 +91,7 @@ import {
   getDialoguesBetweenIDAndContactSubscription,
   getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
-import {createClient} from 'graphql-sse';
+import {createClient} from 'graphql-ws';
 import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import AudioElement from "@/components/audio/AudioElement.vue";

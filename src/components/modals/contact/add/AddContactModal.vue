@@ -31,7 +31,6 @@ const idSuche = ref();
 const cancel = () => modalController.dismiss(null, 'cancel');
 
 function confirm() {
-
   const event = new CustomEvent('idContactSearch', {
     detail: {
       idSuche: idSuche.value,

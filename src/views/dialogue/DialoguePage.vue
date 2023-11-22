@@ -40,7 +40,7 @@ ion-page
       div(v-if="store.lastActiveChatWasWithID")
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
           ion-item
-            NewAudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+            AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
               :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title"
               :checkboxVisible="checkboxVisible")
 
@@ -94,6 +94,7 @@ import {
 import {createClient} from 'graphql-sse';
 import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
+import AudioElement from "@/components/audio/AudioElement.vue";
 
 const {
   result,
@@ -484,12 +485,16 @@ async function stopRecording() {
 }
 
 }
+/*
 
 const event = new CustomEvent('sendSpeechToTextResultToTranscriptModal', {
   detail: {
-    speechToTextResult : result.value
+    spokenText: result.value
   }
 })
+window.dispatchEvent(event)
+*/
+
 
 function clearSearch() {
   audiosMerged.value = store.getCurrentDialoguePartner.dialogues

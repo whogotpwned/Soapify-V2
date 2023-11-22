@@ -1,92 +1,156 @@
-<template lang="pug">
-div(id="wrapper")
-  div(:class="{audioIsSender: isSender, audioIsReceived: !isSender}")
-    ion-card(:id="id")
-      div(v-if="!isChecked && isSender" )
-        ion-button(id="deleteButton" fill="clear" @click="deleteElement(id)") Del
-          ion-icon(slot="end" :icon="trashBinOutline")
+<template>
+  <div id="wrapper">
+    <div :class="{audioIsSender: isSender, audioIsReceived: !isSender}">
+      <ion-card :id="id">
+        <div v-if="!isChecked && isSender">
+          <ion-button id="deleteButton" fill="clear" @click="deleteElement(id)">Del
+            <ion-icon slot="end" :icon="trashBinOutline"></ion-icon>
+          </ion-button>
+        </div>
 
-      ion-item
-        ion-checkbox(v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted")
-
-      ion-card-header
-        div(id="element-id")
-          ion-text
-            ion-text(color="danger") Element-ID: {{ id }}
-
-        ion-accordion-group
-          ion-accordion(value="first")
-            ion-item(slot="header" color="light") Details
-
-            div(slot="content" class="ion-padding")
-              ion-text
-                div(id="titleAndTags")
-                  ion-input(label-placement='floating' v-model="localTitle" :value="localTitle" @keyup.enter="changeTitle(id)")
-                    div(slot='label')
-                      ion-text(color='danger') Titel:
-
-                  input(v-model="specificChip" @keyup.space="addChip(id)")
-
-                ion-item(v-for="chip in aChips" id="audioChip")
-                  ion-chip(color="tertiary" @click="deleteChip(id, chip)") {{ chip }}
-
-      ion-card-content
-        div(id="audio-element-with-spoken-text")
-          ion-accordion-group
-            ion-accordion(value="first")
-              ion-item(slot="header" color="light")
-                ion-label Transkript
-                ion-button(id="kopierenButton" @click="copySpokenToClipboard(spoken)") Kopieren
-              div(slot="content" class="ion-padding") {{ spoken }}
-
-          ion-grid
-            ion-row
-              ion-col(size='40%')
-                ion-button(id="playPauseButton" @click="playPauseAudio" size="large")
-                  ion-icon(slot="icon-only" :icon="playPauseButtonIcon")
-              ion-col(size='60%')
-                div(:id="containerId" @click="playPauseAudio")
-
-                  ion-grid
-                    ion-row
-                      ion-col(size='10px')
-                        p(:id="wavewurferCurrentTimeId") Current: 0.00s
-                      ion-col(size='10px')
-                        p(:id="wavesurferTotalTimeId") Total: 0.00s
-                      ion-col(size='10px')
-                        p(:id="wavewurferRemainingTimeId") Remaining: 0.00s
+        <ion-card-header>
+          <div id="element-id">
+            <ion-text>
+              <ion-text color="danger">Element-ID: {{ id }}</ion-text>
+            </ion-text>
+          </div>
 
 
-  div(id="dialogueTimestamp")
-    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr
 
+          <ion-card-title>
+            <ion-grid>
+              <ion-row>
+
+                <ion-col id="titleAndTags" size="auto">
+                  <ion-input id="inputTitle" v-model="localTitle" :value="localTitle" label-placement="floating"
+                             readonly>
+                  </ion-input>
+                </ion-col>
+
+              </ion-row>
+            </ion-grid>
+          </ion-card-title>
+
+          <ion-card-subtitle>
+            <ion-grid>
+              <ion-col size="8">
+              </ion-col>
+              <ion-col size="8">
+              </ion-col>
+              <ion-col>
+                <ion-button id="actionSheet" class="ion-align-self-end" size="small" @click="setOpen(true)">
+                  <ion-action-sheet
+                      :buttons="actionSheetButtons"
+                      :is-open="isOpen"
+                      header="Actions"
+
+                  ></ion-action-sheet>
+                  <ion-icon :icon="ellipsisVerticalOutline"></ion-icon>
+                </ion-button>
+              </ion-col>
+            </ion-grid>
+          </ion-card-subtitle>
+
+        </ion-card-header>
+
+
+
+        <ion-card-content>
+
+
+          <ion-grid :fixed="true">
+            <ion-row >
+              <ion-col size="auto">
+                <div v-if="checkboxVisible" >
+                  <ion-item class="checkboxItem">
+                    <ion-checkbox v-model="isChecked" label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
+                  </ion-item>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+
+          ------
+          {{ spoken }}
+          ---
+
+
+          <div id="audio-element-with-spoken-text">
+            <ion-accordion-group>
+              <ion-accordion value="first">
+                <ion-item slot="header" color="light">
+                  <ion-label>Transkript</ion-label>
+                  <ion-button id="kopierenButton" @click="copySpokenToClipboard(spoken)">Kopieren</ion-button>
+                </ion-item>
+                <div class="ion-padding" slot="content">{{ spoken }}</div>
+              </ion-accordion>
+            </ion-accordion-group>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="40%">
+                  <ion-button id="playPauseButton" @click="playPauseAudio" size="large">
+                    <ion-icon slot="icon-only" :icon="playPauseButtonIcon"></ion-icon>
+                  </ion-button>
+                </ion-col>
+                <ion-col size="60%">
+                  <div :id="containerId" @click="playPauseAudio">
+                    <ion-grid>
+                      <ion-row>
+                        <ion-col size="10px">
+                          <p :id="wavewurferCurrentTimeId">Current: 0.00s</p>
+                        </ion-col>
+                        <ion-col size="10px">
+                          <p :id="wavesurferTotalTimeId">Total: 0.00s</p>
+                        </ion-col>
+                        <ion-col size="10px">
+                          <p :id="wavewurferRemainingTimeId">Remaining: 0.00s</p>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    <div id="dialogueTimestamp">
+      <p>{{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr</p>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import {onMounted, ref, watch} from 'vue'
 import {
   IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
-  IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput
+  IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput, modalController, IonActionSheet
 } from '@ionic/vue';
-import {heart, trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
+import {heart, trashBinOutline, playCircleOutline, stopCircleOutline, ellipsisVerticalOutline} from 'ionicons/icons';
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
-import {updateTitleInChatsTable} from "@/lib/graphQL/mutations";
+import {insertChipInChipsTable, updateChipsInChatsTable, updateTitleInChatsTable} from "@/lib/graphQL/mutations";
 import WaveSurfer from "wavesurfer.js";
 import Swal from 'sweetalert2';
 import copy from 'copy-to-clipboard';
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {userSessionStore} from "@/lib/store/userSession";
+import EditDetailsModal from "@/components/modals/audio/EditDetailsModal.vue";
+import TransscriptModal from "@/components/modals/audio/TransscriptModal.vue";
+import {getChipsOfChatId} from "@/lib/graphQL/queries";
 
 const props = defineProps({
   path: String,
   id: String,
   spoken: String,
-  aChips: [],
   title: String,
   senderAvatar: String,
   isSender: Boolean,
-  created_at: String
+  created_at: String,
+  audiosMerged: [],
+  checkboxVisible: Boolean
 });
 
 const wavesurfer = ref();
@@ -95,12 +159,14 @@ const wavewurferCurrentTimeId = ref();
 const wavewurferRemainingTimeId = ref();
 
 const store = userSessionStore();
-const playPauseButtonIcon = ref(playCircleOutline);
 
+const playPauseButtonIcon = ref(playCircleOutline);
 const chips = ref([]);
 let specificChip = ref('');
 let localTitle = ref(props.title);
 let isChecked = ref(false);
+const isOpen = ref(false);
+const message = ref('');
 const containerId = ref();
 
 
@@ -114,6 +180,97 @@ const kopiertToast = Swal.mixin({
   showConfirmButton: false,
   timer: 1500,
   timerProgressBar: true
+});
+
+const openEditDetailsModel = async () => {
+
+  const modal = await modalController.create({
+    component: EditDetailsModal,
+    componentProps: {
+      id: props.id,
+      title: localTitle.value,
+    }
+  });
+  await modal.present();
+}
+
+const openTranscriptModal = async () => {
+
+  const modal = await modalController.create({
+    component: TransscriptModal,
+    componentProps: {
+      spoken: props.spoken
+    }
+  });
+  await modal.present();
+}
+
+const actionSheetButtons = [
+  {
+    text: 'EDIT DETAILS',
+    handler: () => {
+      openEditDetailsModel();
+    }
+  },
+  {
+    text: 'MARK TO DELETE',
+    handler: () => {
+      const event = new CustomEvent('checkboxVisibilityState')
+      window.dispatchEvent(event)
+    }
+
+  },
+  {
+    text: 'TRANSSCRIPT',
+    handler: () => {
+      openTranscriptModal();
+      const event = new CustomEvent('speechToText', {
+        detail: {
+          spokenText: props.spoken
+        }
+      })
+      window.dispatchEvent(event)
+    }
+  }
+];
+
+const setOpen = (state: boolean) => {
+  isOpen.value = state;
+};
+
+window.addEventListener('addChip', async (event: any) => {
+
+  try {
+    const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
+      chips: [{chip: event.detail.tag}]
+    })
+
+    const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
+
+    const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
+      chat_id: event.detail.id,
+    });
+
+    const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
+
+    const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
+      chat_id: event.detail.id,
+      chips: [...chipsOfChatWithId, insertChipsResultId]
+    });
+
+
+    props.audiosMerged = props.audiosMerged.map((audio: any) => {
+
+      if (audio.chat_id === event.detail.id) {
+        // extend object by tag
+        audio["chips"].push(event.detail.tag);
+      }
+      return audio;
+    });
+  } catch (e) {
+
+  }
+
 });
 
 function playPauseAudio() {
@@ -255,12 +412,14 @@ function deleteChip(id: any, chip: any) {
 }
 
 async function changeTitle(id: string) {
-  const updateTitleInChatsTableResult = await nhost.graphql.request(updateTitleInChatsTable, {
-    chat_id: id,
-    user_id: store.getSessionID,
-    title: localTitle.value
-  })
-  store.updateDialogueTitleOfDialogueWithId(id, localTitle.value);
+
+  const event = new CustomEvent('changeTitle', {
+    detail: {
+      title: localTitle.value,
+      chat_id: id
+    },
+  });
+  window.dispatchEvent(event)
 }
 
 function deleteElement(id: string) {
@@ -315,6 +474,13 @@ async function checkIfTagExists(tag: string) {
     resolve(false);
   })
 }
+
+window.addEventListener('editDetailsModalChangesTitle', (event: any) => {
+
+  localTitle.value = event.detail.title;
+})
+
+
 </script>
 
 <style scoped>

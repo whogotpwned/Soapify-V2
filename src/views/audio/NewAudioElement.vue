@@ -22,9 +22,6 @@
                   </ion-input>
                 </ion-col>
 
-                <ion-col>
-
-                </ion-col>
               </ion-row>
 
 
@@ -36,12 +33,6 @@
           <ion-card-subtitle>
             <ion-grid>
 
-
-              <!--
-              <ion-col id="audio-element" size="4">
-                <ion-text color="danger"> Element-ID: {{id}}</ion-text>
-              </ion-col>
-            -->
 
               <ion-col size="8">
 
@@ -191,6 +182,7 @@ const openTranscriptModal = async () => {
   const modal = await modalController.create({
     component: TransscriptModal,
     componentProps: {
+      spoken: props.spoken
     }
   });
   await modal.present();

@@ -43,9 +43,7 @@ const app = createApp(App)
 // we refresh the session every 12.5 minutes to be sure that the session is always valid
 setInterval(() => {
     nhost.auth.refreshSession().then((res) => {
-        console.log(localStorage.getItem('soapifyAccessToken'));
         localStorage.setItem('soapifyAccessToken', res.session?.accessToken);
-        console.log(localStorage.getItem('soapifyAccessToken'));
     });
 }, 10 * 1000 * 60);
 

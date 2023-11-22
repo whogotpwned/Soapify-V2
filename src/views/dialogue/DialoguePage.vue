@@ -41,7 +41,7 @@ ion-page
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
           ion-item
             AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-              :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title"
+              :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
               :checkboxVisible="checkboxVisible")
 
   div
@@ -96,15 +96,13 @@ import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import AudioElement from "@/components/audio/AudioElement.vue";
 
-const {
-  result,
-  start,
-  stop,
-} = useSpeechRecognition({
-  lang: 'de-DE',
-  interimResults: false,
-  continuous: false,
+const lang = ref('de-DE')
+const speech = useSpeechRecognition({
+  lang,
+  continuous: true,
 })
+
+
 
 const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
@@ -437,19 +435,21 @@ async function requestPermission() {
 }
 
 async function startRecording() {
-  start();
+
   await requestPermission();
+  speech.result.value = '';
 
   aufnahmeGestartetToast.fire({
     icon: 'success',
     title: 'Aufnahme gestartet'
   });
   isRecording.value = true;
+  speech.start();
   return (await VoiceRecorder.startRecording()).value;
 }
 
 async function stopRecording() {
-  stop();
+  speech.stop();
   const recordedAudio = (await VoiceRecorder.stopRecording()).value;
   const audioBase64 = recordedAudio.recordDataBase64;
   const title = 'Recording: ' + getCurrentDateTimestamp();
@@ -459,7 +459,7 @@ async function stopRecording() {
     audio: audioBase64,
     contact: store.getCurrentDialoguePartner.user_id,
     title: title,
-    speech_to_text: result.value,
+    speech_to_text: speech.result.value,
     chips: [],
     user_id: store.getSessionID,
   });
@@ -474,7 +474,7 @@ async function stopRecording() {
     audio: audioBase64,
     title: title,
     sentByMe: true,
-    spokenText: result.value,
+    speech_to_text: speech.result.value,
     user_id: store.getSessionID,
     chips: []
   }

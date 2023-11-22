@@ -226,7 +226,7 @@ const actionSheetButtons = [
       openTranscriptModal();
       const event = new CustomEvent('speechToText', {
         detail: {
-          spokenText: props.spoken
+          speech_to_text: props.spoken
         }
       })
       window.dispatchEvent(event)

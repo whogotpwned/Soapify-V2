@@ -56,7 +56,7 @@ ion-page
               ion-item-option(v-if="audio.sentByMe" color='danger' @click="deleteElement(audio.chat_id)")
                 ion-icon(slot='icon-only' :icon='trash')
 
-    ion-infinite-scroll(@ionInfinite="ionInfinite")
+    ion-infinite-scroll(position="top" @ionInfinite="ionInfinite")
       ion-infinite-scroll-content
 
   div
@@ -160,13 +160,12 @@ async function openUserDetailsModal(avatar, user_id, email) {
 }
 
 const generateItems = () => {
-  const count = items.length;
-  console.log("Count : " + count + " " + "Merged Length: " + store.getCurrentDialoguePartner.dialogues.length);
-  if (count >= store.getCurrentDialoguePartner.dialogues.length) {
+  const count = store.getCurrentDialoguePartner.dialogues.length - 1;
+  console.log("Count : " + count + " " + "Merged Length: " + (items.length));
+  if (count - items.length <= 0) {
     return;
   }
-
-  items.push(store.getCurrentDialoguePartner.dialogues[count]);
+  items.unshift(store.getCurrentDialoguePartner.dialogues[count - items.length]);
 };
 
 const ionInfinite = (ev: InfiniteScrollCustomEvent) => {

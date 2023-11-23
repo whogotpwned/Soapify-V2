@@ -4,8 +4,6 @@
 
     <div class="{audioIsSender: isSender, audioIsReceived: !isSender}">
 
-      {{ id }}
-
       <ion-card id="audio-card">
 
         <ion-card-header>

@@ -1,7 +1,7 @@
 <template>
   <div id="wrapper">
     <div :class="{audioIsSender: isSender, audioIsReceived: !isSender}">
-      <ion-card :id="id">
+      <ion-card ref="htmlCardRef">
         <div v-if="!isChecked && isSender">
           <ion-button id="deleteButton" fill="clear" @click="deleteElement(id)">Del
             <ion-icon slot="end" :icon="trashBinOutline"></ion-icon>
@@ -14,8 +14,6 @@
               <ion-text color="danger">Element-ID: {{ id }}</ion-text>
             </ion-text>
           </div>
-
-
 
           <ion-card-title>
             <ion-grid>
@@ -38,16 +36,12 @@
               <ion-col size="8">
               </ion-col>
               <ion-col>
-                <ion-button id="actionSheet" class="ion-align-self-end" size="small" @click="setOpen(true)">
-                  <ion-action-sheet
-                      :buttons="actionSheetButtons"
-                      :is-open="isOpen"
-                      @didDismiss="setOpen(false)"
-                      header="Actions"
-
-                  ></ion-action-sheet>
-                  <ion-icon :icon="ellipsisVerticalOutline"></ion-icon>
-                </ion-button>
+                <ion-action-sheet
+                    :buttons="actionSheetButtons"
+                    :is-open="isOpen"
+                    @didDismiss="setOpen(false)"
+                    header="Actions"
+                ></ion-action-sheet>
               </ion-col>
             </ion-grid>
           </ion-card-subtitle>
@@ -113,7 +107,7 @@
 import {onMounted, ref, watch} from 'vue'
 import {
   IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
-  IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput, modalController, IonActionSheet
+  IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput, modalController, IonActionSheet, createGesture
 } from '@ionic/vue';
 import {heart, trashBinOutline, playCircleOutline, stopCircleOutline, ellipsisVerticalOutline} from 'ionicons/icons';
 import {v4 as uuidv4} from 'uuid';
@@ -127,6 +121,7 @@ import {userSessionStore} from "@/lib/store/userSession";
 import EditDetailsModal from "@/components/modals/audio/EditDetailsModal.vue";
 import TransscriptModal from "@/components/modals/audio/TransscriptModal.vue";
 import {getChipsOfChatId} from "@/lib/graphQL/queries";
+import {onLongPress} from "@vueuse/core";
 
 const props = defineProps({
   path: String,
@@ -140,7 +135,7 @@ const props = defineProps({
   checkboxVisible: Boolean
 });
 
-
+const htmlCardRef = ref<HTMLElement | null>(null)
 const wavesurfer = ref();
 const wavesurferTotalTimeId = ref();
 const wavewurferCurrentTimeId = ref();
@@ -156,6 +151,7 @@ let isChecked = ref(false);
 const isOpen = ref(false);
 const message = ref('');
 const containerId = ref();
+
 
 
 const kopiertToast = Swal.mixin({
@@ -192,6 +188,10 @@ const openTranscriptModal = async () => {
   });
   await modal.present();
 }
+
+onLongPress(htmlCardRef, () => {
+  setOpen(true)
+})
 
 const actionSheetButtons = [
   {
@@ -319,9 +319,8 @@ onMounted(async () => {
     // use wavesurfer to load audio in props.path which is a base64 encoded string
     wavesurfer.value.load(`data:audio/wav;base64,${props.path}`);
   })
+});
 
-
-})
 
 function getHumanReadableTimestampFromCreatedAt(createdAt: string) {
   const date = new Date(createdAt);

@@ -22,7 +22,6 @@ ion-page
 
 
   ion-content(:fullscreen="true" id="dialoguePage")
-
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -39,7 +38,7 @@ ion-page
 
     ion-list
       div(v-if="store.lastActiveChatWasWithID")
-        div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
+        div(v-for="audio in items" key="audio.id" id="audioElementsMerged")
 
 
           ion-item-sliding
@@ -48,7 +47,7 @@ ion-page
                 ion-icon(slot='icon-only' :icon='archive')
           
             ion-item
-              AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+              AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title")
 
             ion-item-options(side='end')
               ion-item-option
@@ -56,6 +55,9 @@ ion-page
 
               ion-item-option(v-if="audio.sentByMe" color='danger' @click="deleteElement(audio.chat_id)")
                 ion-icon(slot='icon-only' :icon='trash')
+
+    ion-infinite-scroll(@ionInfinite="ionInfinite")
+      ion-infinite-scroll-content
 
   div
     ion-footer(id="footer")
@@ -126,6 +128,7 @@ const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 const receivedNewMessage = ref(false);
+const items = reactive([]);
 
 
 onIonViewWillEnter(() => {
@@ -133,6 +136,8 @@ onIonViewWillEnter(() => {
 });
 
 refreshAllChats();
+
+
 
 watch(() => audiosMerged.value, (newValue, oldValue) => {
   if (newValue !== oldValue) {
@@ -153,6 +158,23 @@ async function openUserDetailsModal(avatar, user_id, email) {
   })
   modal.present();
 }
+
+const generateItems = () => {
+  const count = items.length;
+  console.log("Count : " + count + " " + "Merged Length: " + store.getCurrentDialoguePartner.dialogues.length);
+  if (count >= store.getCurrentDialoguePartner.dialogues.length) {
+    return;
+  }
+
+  items.push(store.getCurrentDialoguePartner.dialogues[count]);
+};
+
+const ionInfinite = (ev: InfiniteScrollCustomEvent) => {
+  generateItems();
+  setTimeout(() => ev.target.complete(), 500);
+};
+
+generateItems();
 
 
 async function refreshAllChats() {
@@ -523,10 +545,11 @@ async function stopRecording() {
     audio: audioBase64,
     title: title,
     sentByMe: true,
-    spokenText: result.value,
+    speech_to_text: result.value,
     user_id: store.getSessionID,
     chips: []
   }
+
 
   audiosMerged.value.push(newAudioElement);
   store.addDialogueToCurrentDialoguePartner(newAudioElement);

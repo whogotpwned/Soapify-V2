@@ -78,7 +78,6 @@
       <p>{{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr</p>
     </div>
   </div>
-
 </template>
 
 <script lang="ts" setup>
@@ -87,7 +86,9 @@ import {
   IonAccordion, IonButton, IonCheckbox, IonIcon, IonItem, IonLabel, IonCard, IonText, IonCardHeader,
   IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput, modalController, IonActionSheet, createGesture
 } from '@ionic/vue';
-import {heart, trashBinOutline, playCircleOutline, stopCircleOutline, ellipsisVerticalOutline} from 'ionicons/icons';
+
+import {heart, trashBinOutline, playCircleOutline, stopCircleOutline, ellipsisVerticalOutline, trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
+import {trash, heart, archive} from "ionicons/icons";
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
 import {insertChipInChipsTable, updateChipsInChatsTable, updateTitleInChatsTable} from "@/lib/graphQL/mutations";
@@ -381,37 +382,7 @@ async function changeTitle(id: string) {
   window.dispatchEvent(event)
 }
 
-function deleteElement(id: string) {
-  Swal.fire({
-    title: 'Element wirklich unwiderruflich löschen?',
-    showCancelButton: true,
-    confirmButtonText: 'Löschen',
-    denyButtonText: `Don't save`,
-    heightAuto: false
-  }).then((result) => {
-    /* Read more chats isConfirmed, isDenied below */
-    if (result.isConfirmed) {
-      try {
-        // send event to parent component DialoguePage.vue to delete element from audios array
-        const event = new CustomEvent('deleteElement', {
-          detail: {
-            id: id
-          },
-        });
-        window.dispatchEvent(event);
-        // document.getElementById(id).remove();
-      } catch (e) {
-        Swal.fire({
-          title: 'Fehler :(',
-          text: 'Löschen fehlerhaft',
-          icon: 'error',
-          confirmButtonText: 'Cool',
-          heightAuto: false
-        })
-      }
-    }
-  });
-}
+
 
 function markCheckboxesToBeDeleted() {
   const event = new CustomEvent('markCheckboxesToBeDeleted', {

@@ -22,7 +22,6 @@ ion-page
         ion-icon(slot="end")
 
 
-
   ion-content(:fullscreen="true" id="dialoguePage")
 
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
@@ -47,8 +46,6 @@ ion-page
               ion-item(v-if="!audio.sentByMe")
 
                 div(v-if="showAvatar(audio.chat_id)")
-                  ion-avatar
-
 
                 AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
                   :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
@@ -62,10 +59,24 @@ ion-page
                   :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
+          ion-item-sliding
+            ion-item-options(side='start')
+              ion-item-option(color='success')
+                ion-icon(slot='icon-only' :icon='archive')
+          
+            ion-item
+              AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
+
+            ion-item-options(side='end')
+              ion-item-option
+                ion-icon(slot='icon-only' :icon='heart')
+
+              ion-item-option(v-if="audio.sentByMe" color='danger' @click="deleteElement(audio.chat_id)")
+                ion-icon(slot='icon-only' :icon='trash')
+
   div
     ion-footer(id="footer")
       ion-toolbar(id="footerToolbar")
-
         div(v-if="store.currentDialoguePartner.user_id")
           div(v-if="!isRecording")
             ion-button(id="recordingButton" shape="round" @click="startRecording()")
@@ -91,7 +102,7 @@ import {
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {VoiceRecorder} from "capacitor-voice-recorder";
-import {recordingOutline, stopCircleOutline, trash, caretDownOutline, trendingDown} from 'ionicons/icons';
+import {recordingOutline, stopCircleOutline, trash, caretDownOutline, heart, archive} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
@@ -253,6 +264,41 @@ const openModal = async () => {
   modal.present();
 };
 
+function deleteElement(id: string) {
+  Swal.fire({
+    title: 'Element wirklich unwiderruflich löschen?',
+    showCancelButton: true,
+    confirmButtonText: 'Löschen',
+    denyButtonText: `Don't save`,
+    heightAuto: false
+  }).then(async (result) => {
+    /* Read more chats isConfirmed, isDenied below */
+    if (result.isConfirmed) {
+      try {
+        // deleteChatInChatsTableByUserIdAndChatId
+        audiosMerged.value = audiosMerged.value.filter((audio: any) => {
+          return audio.chat_id !== id;
+        });
+
+        const deleteChatInChatsTableByUserIdAndChatIdResult = await nhost.graphql.request(deleteChatInChatsTableByUserIdAndChatId, {
+          user_id: store.getSessionID,
+          chat_id: id
+        });
+
+        store.deleteDialogueWithId(id);
+      } catch (e) {
+        Swal.fire({
+          title: 'Fehler :(',
+          text: 'Löschen fehlerhaft',
+          icon: 'error',
+          confirmButtonText: 'Cool',
+          heightAuto: false
+        })
+      }
+    }
+  });
+}
+
 
 window.addEventListener('search', async (event: any) => {
 
@@ -277,9 +323,7 @@ window.addEventListener('search', async (event: any) => {
       start: event.detail.dateSearchStarting,
       end: event.detail.dateSearchEnding
     });
-
-    console.log(getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult);
-
+    
     const targetChatIds = getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRangeResult.data.chats.map((chat: any) => {
       return chat.chat_id;
     });
@@ -291,6 +335,33 @@ window.addEventListener('search', async (event: any) => {
   }
 });
 
+
+window.addEventListener('addChip', async (event: any) => {
+  const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
+    chips: [{chip: event.detail.tag}]
+  })
+
+  const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
+
+  const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
+    chat_id: event.detail.id,
+  });
+
+  const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
+
+  const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
+    chat_id: event.detail.id,
+    chips: [...chipsOfChatWithId, insertChipsResultId]
+  });
+
+
+  audiosMerged.value = audiosMerged.value.map((audio: any) => {
+    if (audio.chat_id === event.detail.id) {
+      audio["chips"].push(event.detail.tag);
+    }
+    return audio;
+  });
+});
 
 window.addEventListener('openDialogue', (event: any) => {
   currentDialoguePartner.value = {
@@ -318,20 +389,6 @@ window.addEventListener('deleteChip', (event: any) => {
     }
     return audio;
   });
-});
-
-window.addEventListener('deleteElement', async (event: any) => {
-  // deleteChatInChatsTableByUserIdAndChatId
-  audiosMerged.value = audiosMerged.value.filter((audio: any) => {
-    return audio.chat_id !== event.detail.id;
-  });
-
-  const deleteChatInChatsTableByUserIdAndChatIdResult = await nhost.graphql.request(deleteChatInChatsTableByUserIdAndChatId, {
-    user_id: store.getSessionID,
-    chat_id: event.detail.id
-  });
-
-  store.deleteDialogueWithId(event.detail.id);
 });
 
 onMounted(async () => {

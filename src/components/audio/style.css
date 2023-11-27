@@ -56,11 +56,9 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
 #first {
     width: 60px;
     float:left; /* add this */
-    padding-bottom: 30px;
-    border: 1px solid red;
+    padding-bottom: 41px;
 }
 #second {
-    border: 1px solid green;
     width: 150px;
     padding-bottom: 20px;
     float: left; /* add this */
@@ -102,6 +100,6 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
 }
 
 #playPauseButton {
-    padding-top: 50px;
+    padding-top: 30px;
 
 }

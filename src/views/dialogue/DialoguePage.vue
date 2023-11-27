@@ -23,7 +23,6 @@ ion-page
 
 
   ion-content(:fullscreen="true" id="dialoguePage")
-
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -41,17 +40,22 @@ ion-page
     div(v-if="store.lastActiveChatWasWithID")
       ion-grid
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
-          ion-row
-            ion-col
-              ion-item(v-if="!audio.sentByMe")
+          div(v-if="!audio.sentByMe")
+            ion-row
+              ion-col(class="received")
+                ion-item(v-if="!audio.sentByMe")
+                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
-                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+              ion-col(class="sent")
 
+          div(v-else)
+            ion-row
+              ion-col(class="received")
+                ion-item(v-if="!audio.sentByMe")
 
-            ion-col
-              ion-item(v-if="audio.sentByMe" )
+              ion-col(class="sent")
                 AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
                   :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
                   :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
@@ -61,9 +65,6 @@ ion-page
             ion-item-options(side='start')
               ion-item-option(color='success')
                 ion-icon(slot='icon-only' :icon='archive')
-
-            ion-item
-              AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :created_at="audio.created_at" :isSender="audio.sentByMe" :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.spokenText" :title="audio.title")
 
             ion-item-options(side='end')
               ion-item-option
@@ -119,7 +120,6 @@ import {
   getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
 import {createClient} from 'graphql-ws';
-import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import AudioElement from "@/components/audio/AudioElement.vue";
 

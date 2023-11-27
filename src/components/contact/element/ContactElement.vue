@@ -3,8 +3,8 @@ ion-item-sliding
   ion-item-options(side='start')
     ion-item-option(color='success')
       ion-icon(slot='icon-only' :icon='archive')
-  ion-item
-    ion-card(ref="htmlRef" class="onhover" @click="openDialogue(user, user_id, email)")
+  ion-item(@click="openDialogue(user, user_id, email)")
+    div(ref="htmlRef" class="onhover")
       div(class="image_container")
         img(:src="avatar" alt="avatar")
 

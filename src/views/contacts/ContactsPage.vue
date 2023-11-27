@@ -12,9 +12,8 @@ ion-page
 
 
       ion-list(lines="full")
-        ion-item(v-for="contact in contacts" :key="contact")
-          ion-label
-            ContactElement(:avatar="contact.avatarSrc" :email="contact.email" :user="contact.username" :user_id="contact.user_id")
+        div(v-for="contact in contacts" :key="contact")
+          ContactElement(:avatar="contact.avatarSrc" :email="contact.email" :user="contact.username" :user_id="contact.user_id")
 
     p query
 

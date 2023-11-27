@@ -43,11 +43,10 @@ ion-page
           div(v-if="!audio.sentByMe")
             ion-row
               ion-col(class="received")
-                transition-fade
-                  div(:id="audio.chat_id")
-                    AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                      :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                      :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                div(:id="audio.chat_id")
+                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
               ion-col(class="sent")
 
@@ -56,11 +55,10 @@ ion-page
               ion-col(class="received")
 
               ion-col(class="sent")
-                transition-fade
-                  div(:id="audio.chat_id")
-                    AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                      :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                      :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                div(:id="audio.chat_id")
+                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
 

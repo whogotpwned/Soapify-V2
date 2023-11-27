@@ -557,8 +557,10 @@ async function stopRecording() {
     setTimeout(() => {
 
 
-      // TODO: Scroll here ....
-
+      // scroll down to bottom
+      const elem = document.getElementById(generatedChatId);
+      elem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+      
     }, 1000);
 
     audiosMerged.value.push(newAudioElement);

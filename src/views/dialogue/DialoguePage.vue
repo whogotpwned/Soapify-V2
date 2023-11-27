@@ -3,8 +3,6 @@ ion-page
   ion-loading(message="Lade Dialoge ...")
   ion-header
     ion-toolbar
-      ion-buttons(slot="start")
-        ion-menu-button asdasd
       ion-toolbar(id="dialoguePartnerToolbar")
         div(id="wrapper" v-if="store.getLastActiveChatWasWithID")
           div(id="dialoguePartnerAvatar")
@@ -16,8 +14,11 @@ ion-page
       ion-searchbar(id="open-modal" :cancel-button-icon="trash" :placeholder="searchbarPlaceholder"
         show-cancel-button="always" @ionCancel="clearSearch" @ionFocus="openModal")
 
-    div(v-if="audioElementsToBeDeleted.length > 0")
+    div(v-if="audioElementsToBeDeleted.length > 0 && checkboxVisible")
       ion-button(id="deleteAllCheckedBoxes" fill="clear" @click="deleteMarkedCheckboxes") Ausgewählte Elemente löschen
+        ion-icon(slot="end")
+    div(v-if="checkboxVisible")
+      ion-button(id="dismissMarkToDelete" fill="clear" @click="checkboxVisible=false") Cancel
         ion-icon(slot="end")
 
 
@@ -37,9 +38,25 @@ ion-page
 
     ExploreContainer(name="Tab 1 page")
 
-    ion-list
-      div(v-if="store.lastActiveChatWasWithID")
+    div(v-if="store.lastActiveChatWasWithID")
+      ion-grid
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
+          ion-row
+            ion-col
+              ion-item(v-if="!audio.sentByMe")
+
+                div(v-if="showAvatar(audio.chat_id)")
+
+                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+
+
+            ion-col
+              ion-item(v-if="audio.sentByMe" )
+                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
           ion-item-sliding
@@ -82,8 +99,8 @@ import {
   IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonTitle, IonToolbar, loadingController,
   IonAvatar, IonSearchbar, IonButton, IonRefresher, IonRefresherContent, IonFooter
 } from '@ionic/vue';
+
 import ExploreContainer from '@/components/ExploreContainer.vue';
-import AudioElement from "@/components/audio/AudioElement.vue";
 import {VoiceRecorder} from "capacitor-voice-recorder";
 import {recordingOutline, stopCircleOutline, trash, caretDownOutline, heart, archive} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
@@ -104,17 +121,17 @@ import {
   getChatIdOfChatWithTitle, getChatsOfUserBetweenUserWithIdAndUserWithAnotherIdInTimeRange
 } from "@/lib/graphQL/queries";
 import {createClient} from 'graphql-ws';
+import NewAudioElement from "@/views/audio/NewAudioElement.vue";
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
+import AudioElement from "@/components/audio/AudioElement.vue";
 
-const {
-  result,
-  start,
-  stop,
-} = useSpeechRecognition({
-  lang: 'de-DE',
-  interimResults: false,
-  continuous: false,
+const lang = ref('de-DE')
+const speech = useSpeechRecognition({
+  lang,
+  continuous: true,
 })
+
+
 
 const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
@@ -126,6 +143,7 @@ const searchbarPlaceholder = ref('Suche ...');
 const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 const receivedNewMessage = ref(false);
+const checkboxVisible = ref(false);
 
 
 onIonViewWillEnter(() => {
@@ -157,7 +175,7 @@ async function openUserDetailsModal(avatar, user_id, email) {
 
 async function refreshAllChats() {
 
-  if (!store.currentDialoguePartner.user_id) {
+  if(!store.currentDialoguePartner.user_id) {
     return;
   }
 
@@ -317,6 +335,7 @@ window.addEventListener('search', async (event: any) => {
   }
 });
 
+
 window.addEventListener('addChip', async (event: any) => {
   const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
     chips: [{chip: event.detail.tag}]
@@ -362,7 +381,7 @@ window.addEventListener('deleteChip', (event: any) => {
       audio.chips = audio.chips.filter((chip: any) => {
         return chip !== event.detail.chip
       });
-
+      
       const deleteChipResult = await nhost.graphql.request(updateChipsInChatsTable, {
         chat_id: event.detail.id,
         chips: audio.chips
@@ -445,6 +464,10 @@ window.addEventListener('markCheckboxesToBeDeleted', (event: any) => {
   }
 });
 
+window.addEventListener('checkboxVisibilityState', (event: any) => {
+  checkboxVisible.value = true;
+})
+
 function deleteMarkedCheckboxes() {
   Swal.fire({
     title: 'Ausgewählte Elemente wirklich unwiderruflich löschen?',
@@ -477,6 +500,8 @@ function deleteMarkedCheckboxes() {
           confirmButtonText: 'Cool',
           heightAuto: false
         })
+      } finally {
+        checkboxVisible.value =false
       }
     }
   });
@@ -487,19 +512,21 @@ async function requestPermission() {
 }
 
 async function startRecording() {
-  start();
+
   await requestPermission();
+  speech.result.value = '';
 
   aufnahmeGestartetToast.fire({
     icon: 'success',
     title: 'Aufnahme gestartet'
   });
   isRecording.value = true;
+  speech.start();
   return (await VoiceRecorder.startRecording()).value;
 }
 
 async function stopRecording() {
-  stop();
+  speech.stop();
   const recordedAudio = (await VoiceRecorder.stopRecording()).value;
   const audioBase64 = recordedAudio.recordDataBase64;
   const title = 'Recording: ' + getCurrentDateTimestamp();
@@ -509,12 +536,13 @@ async function stopRecording() {
     audio: audioBase64,
     contact: store.getCurrentDialoguePartner.user_id,
     title: title,
-    speech_to_text: result.value,
+    speech_to_text: speech.result.value,
     chips: [],
     user_id: store.getSessionID,
   });
 
-  const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
+  if(insertNewDialogueResult.data) {
+    const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
 
   const newAudioElement = {
     chat_id: generatedChatId,
@@ -523,13 +551,16 @@ async function stopRecording() {
     audio: audioBase64,
     title: title,
     sentByMe: true,
-    spokenText: result.value,
+    speech_to_text: speech.result.value,
     user_id: store.getSessionID,
     chips: []
   }
 
   audiosMerged.value.push(newAudioElement);
+
   store.addDialogueToCurrentDialoguePartner(newAudioElement);
+}
+
 }
 
 function clearSearch() {

@@ -71,6 +71,20 @@ export const userSessionStore = defineStore({
             this.currentDialoguePartner["dialogues"] = this.currentDialoguePartner["dialogues"].filter((dialogue: any) => {
                 return dialogue.chat_id !== chatID;
             })
+        }, addChipToCurrentDialoguePartner(chip: string, chat_id: string) {
+            this.currentDialoguePartner["dialogues"] = this.currentDialoguePartner["dialogues"].map((dialogue: any) => {
+
+                if (dialogue.chat_id === chat_id) {
+                    // extend object by tag
+                    dialogue["chips"].push(chip);
+                }
+                return dialogue;
+            });
+        }, getChipsOfDialoguePartnerFromChatWithChatId(chat_id: string) {
+
+            const objIndex = this.currentDialoguePartner["dialogues"].findIndex((obj => obj["chat_id"] == chat_id));
+            return this.getCurrentDialoguePartner["dialogues"][objIndex]["chips"];
+
         }, setSearchObject(searchObject: object) {
             this.searchObject = searchObject;
         }, updateSearchObjectAttribute(attribute: string, value: string) {

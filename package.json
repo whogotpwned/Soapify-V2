@@ -24,6 +24,7 @@
     "@ionic-native/android-permissions": "^5.36.0",
     "@ionic/vue": "^7.0.0",
     "@ionic/vue-router": "^7.0.0",
+    "@morev/vue-transitions": "^2.3.6",
     "@nhost/vue": "^1.14.0",
     "@supabase/supabase-js": "^2.38.0",
     "@vue/apollo-composable": "^4.0.0-beta.11",

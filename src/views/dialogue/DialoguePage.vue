@@ -35,11 +35,7 @@ ion-page
       ion-toolbar
         ion-title(size="large") Dialoge
 
-
-
     ExploreContainer(name="Tab 1 page")
-
-
 
     div(v-if="store.lastActiveChatWasWithID")
       ion-grid
@@ -47,10 +43,11 @@ ion-page
           div(v-if="!audio.sentByMe")
             ion-row
               ion-col(class="received")
-                div(:id="audio.chat_id")
-                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                transition-fade
+                  div(:id="audio.chat_id")
+                    AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                      :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                      :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
               ion-col(class="sent")
 
@@ -59,10 +56,11 @@ ion-page
               ion-col(class="received")
 
               ion-col(class="sent")
-                div(:id="audio.chat_id")
-                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                transition-fade
+                  div(:id="audio.chat_id")
+                    AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                      :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                      :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
 
@@ -78,10 +76,11 @@ ion-page
               ion-item-option(v-if="audio.sentByMe" color='danger' @click="deleteElement(audio.chat_id)")
                 ion-icon(slot='icon-only' :icon='trash')
 
-  div(v-if="receivedNewMessage" id="scrollToBottomFAB")
-    ion-fab(slot='fixed' vertical='bottom' horizontal='end' @click="scrollToBottomOfDialoguePage")
-      ion-fab-button
-        ion-icon(:icon='arrowDownCircleOutline')
+  transition-fade
+    div(v-if="receivedNewMessage" id="scrollToBottomFAB")
+      ion-fab(slot='fixed' vertical='bottom' horizontal='end' @click="scrollToBottomOfDialoguePage")
+        ion-fab-button
+          ion-icon(:icon='arrowDownCircleOutline')
 
   div
     ion-footer(id="footer")
@@ -132,6 +131,7 @@ import {
 import {createClient} from 'graphql-ws';
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import AudioElement from "@/components/audio/AudioElement.vue";
+import { TransitionFade } from '@morev/vue-transitions';
 
 const lang = ref('de-DE')
 const speech = useSpeechRecognition({

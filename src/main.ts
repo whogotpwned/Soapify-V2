@@ -5,6 +5,8 @@ import {IonicVue} from '@ionic/vue';
 import {createPinia} from 'pinia';
 import piniaPluginPersistedState from "pinia-plugin-persistedstate"
 import {apolloProvider} from "@/lib/apollo/client/apolloClient";
+import VueTransitions from '@morev/vue-transitions';
+import '@morev/vue-transitions/styles';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -36,7 +38,8 @@ const app = createApp(App)
     .use(IonicVue)
     .use(router)
     .use(AVPlugin)
-    .use(apolloProvider);
+    .use(apolloProvider)
+    .use(VueTransitions);
 
 
 // per default the session is valid for 15 minutes

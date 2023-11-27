@@ -13,16 +13,21 @@ div(ref='htmlCardRef')
     div(v-if='checkboxVisible')
       ion-item.checkboxItem
         ion-checkbox(label-placement='start' @click='markCheckboxesToBeDeleted')
-    #first
-      ion-button#playPauseButton(@click='playPauseAudio')
-        ion-icon(slot='icon-only' :icon='playPauseButtonIcon')
-    #second
-      #visualiserDiv
-        ion-row
-          ion-col.ion-align-self-end
-            div(:id='containerId' @click='playPauseAudio')
-  #dialogueTimestamp
-    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr
+    ion-grid
+      ion-row
+        ion-col(size="auto")
+          #first
+            ion-button#playPauseButton(@click='playPauseAudio')
+              ion-icon(slot='icon-only' :icon='playPauseButtonIcon')
+        ion-col(size="auto")
+          #second
+            #visualiserDiv
+              ion-row
+                ion-col.ion-align-self-end
+                  div(:id='containerId' @click='playPauseAudio')
+        ion-col(size="auto")
+          div(id="humanReadableTimestamp")
+            h5 {{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr
 </template>
 
 <script lang="ts" setup>

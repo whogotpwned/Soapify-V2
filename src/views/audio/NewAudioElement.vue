@@ -352,8 +352,3 @@ window.addEventListener('editDetailsModalChangesTitle', (event: any) => {
 
 
 </script>
-
-<style scoped>
-@import './style.css';
-
-</style>

@@ -1,106 +1,84 @@
 <template>
-  <div id="wrapper">
-    <div :class="{audioIsSender: isSender, audioIsReceived: !isSender}">
-      <ion-card ref="htmlCardRef">
-        <div v-if="!isChecked && isSender">
-          <ion-button id="deleteButton" fill="clear" @click="deleteElement(id)">Del
-            <ion-icon slot="end" :icon="trashBinOutline"></ion-icon>
-          </ion-button>
+  <div  ref="htmlCardRef" >
+
+    <!--
+    <div v-if="!isChecked && isSender" class="ion-align-self-start">
+      <ion-button  id="deleteButton" fill="clear" @click="deleteElement(id)">Del
+        <ion-icon slot="end" :icon="trashBinOutline"></ion-icon>
+      </ion-button>
+    </div>
+    -->
+
+    <ion-card-header>
+
+      <!--
+      <div id="element-id">
+        <ion-text>
+          <ion-text color="danger">Element-ID: {{ id }}</ion-text>
+        </ion-text>
+      </div>
+      -->
+      <ion-card-title>
+        <ion-grid>
+          <ion-row justify-content-center>
+
+            <ion-col class="ion-align-items-center" size="auto">
+              <ion-input id="audioTitle" v-model="localTitle" :value="localTitle" class="ion-text-sm-center"
+                         label-placement="floating"
+                         readonly>
+              </ion-input>
+            </ion-col>
+
+          </ion-row>
+        </ion-grid>
+      </ion-card-title>
+
+      <ion-card-subtitle>
+        <div>
+          <ion-action-sheet
+              :buttons="actionSheetButtons"
+              :is-open="isOpen"
+              @didDismiss="setOpen(false)"
+          ></ion-action-sheet>
         </div>
 
-        <ion-card-header>
-          <div id="element-id">
-            <ion-text>
-              <ion-text color="danger">Element-ID: {{ id }}</ion-text>
-            </ion-text>
-          </div>
+      </ion-card-subtitle>
 
-          <ion-card-title>
-            <ion-grid>
-              <ion-row>
+    </ion-card-header>
 
-                <ion-col id="titleAndTags" size="auto">
-                  <ion-input id="inputTitle" v-model="localTitle" :value="localTitle" label-placement="floating"
-                             readonly>
-                  </ion-input>
-                </ion-col>
+    <ion-card-content id="wrapper">
 
-              </ion-row>
-            </ion-grid>
-          </ion-card-title>
+      <div v-if="checkboxVisible">
+        <ion-item class="checkboxItem">
+          <ion-checkbox label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
+        </ion-item>
+      </div>
+      <div id="first">
+        <ion-button id="playPauseButton" @click="playPauseAudio">
+          <ion-icon slot="icon-only" :icon="playPauseButtonIcon"></ion-icon>
+        </ion-button>
+      </div>
 
-          <ion-card-subtitle>
-            <ion-grid>
-              <ion-col size="8">
-              </ion-col>
-              <ion-col size="8">
-              </ion-col>
-              <ion-col>
-                <ion-action-sheet
-                    :buttons="actionSheetButtons"
-                    :is-open="isOpen"
-                    @didDismiss="setOpen(false)"
-                    header="Actions"
-                ></ion-action-sheet>
-              </ion-col>
-            </ion-grid>
-          </ion-card-subtitle>
+      <div id="second">
+        <div id="visualiserDiv">
+          <ion-row>
+            <ion-col class="ion-align-self-end">
+              <div :id="containerId" @click="playPauseAudio">
 
-        </ion-card-header>
+              </div>
+            </ion-col>
 
+          </ion-row>
 
+        </div>
+      </div>
+    </ion-card-content>
 
-        <ion-card-content>
-
-
-          <ion-grid :fixed="true">
-            <ion-row >
-              <ion-col size="auto">
-                <div v-if="checkboxVisible" >
-                  <ion-item class="checkboxItem">
-                    <ion-checkbox label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
-                  </ion-item>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <div id="audio-element-with-spoken-text">
-
-            <ion-grid>
-              <ion-row>
-                <ion-col size="40%">
-                  <ion-button id="playPauseButton" @click="playPauseAudio" size="large">
-                    <ion-icon slot="icon-only" :icon="playPauseButtonIcon"></ion-icon>
-                  </ion-button>
-                </ion-col>
-                <ion-col size="60%">
-                  <div :id="containerId" @click="playPauseAudio">
-                    <ion-grid>
-                      <ion-row>
-                        <ion-col size="10px">
-                          <p :id="wavewurferCurrentTimeId">Current: 0.00s</p>
-                        </ion-col>
-                        <ion-col size="10px">
-                          <p :id="wavesurferTotalTimeId">Total: 0.00s</p>
-                        </ion-col>
-                        <ion-col size="10px">
-                          <p :id="wavewurferRemainingTimeId">Remaining: 0.00s</p>
-                        </ion-col>
-                      </ion-row>
-                    </ion-grid>
-                  </div>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-          </div>
-        </ion-card-content>
-      </ion-card>
-    </div>
     <div id="dialogueTimestamp">
       <p>{{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr</p>
     </div>
   </div>
+
 </template>
 
 <script lang="ts" setup>
@@ -151,7 +129,6 @@ let isChecked = ref(false);
 const isOpen = ref(false);
 const message = ref('');
 const containerId = ref();
-
 
 
 const kopiertToast = Swal.mixin({
@@ -275,18 +252,18 @@ function playPauseAudio() {
       remainingTime = totalTime - currentTime;
 
 
-    const setDynamicIDsForAudioStatistics = new Promise((resolve, reject) => {
-      wavesurferTotalTimeId.value = `#${containerId.value}-time-total`;
-      wavewurferCurrentTimeId.value = `#${containerId.value}-time-current`;
-      wavewurferRemainingTimeId.value = `#${containerId.value}-time-remaining`;
-      resolve((wavesurferTotalTimeId.value, wavewurferCurrentTimeId.value, wavewurferRemainingTimeId.value));
-    });
+  const setDynamicIDsForAudioStatistics = new Promise((resolve, reject) => {
+    wavesurferTotalTimeId.value = `#${containerId.value}-time-total`;
+    wavewurferCurrentTimeId.value = `#${containerId.value}-time-current`;
+    wavewurferRemainingTimeId.value = `#${containerId.value}-time-remaining`;
+    resolve((wavesurferTotalTimeId.value, wavewurferCurrentTimeId.value, wavewurferRemainingTimeId.value));
+  });
 
-    setDynamicIDsForAudioStatistics.then(() => {
-      document.getElementById(wavesurferTotalTimeId.value).innerText = "Total: " + totalTime.toFixed(1) + "s";
-      document.getElementById(wavewurferCurrentTimeId.value).innerText = "Current: " + currentTime.toFixed(1) + "s";
-      document.getElementById(wavewurferRemainingTimeId.value).innerText = "Remaining: " + remainingTime.toFixed(1) + "s";
-    });
+  setDynamicIDsForAudioStatistics.then(() => {
+    document.getElementById(wavesurferTotalTimeId.value).innerText = "Total: " + totalTime.toFixed(1) + "s";
+    document.getElementById(wavewurferCurrentTimeId.value).innerText = "Current: " + currentTime.toFixed(1) + "s";
+    document.getElementById(wavewurferRemainingTimeId.value).innerText = "Remaining: " + remainingTime.toFixed(1) + "s";
+  });
 }
 
 function uuidObjectToString(uuidObject) {

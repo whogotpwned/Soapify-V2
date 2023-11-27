@@ -39,13 +39,28 @@ ion-page
 
     ExploreContainer(name="Tab 1 page")
 
-    ion-list
-      div(v-if="store.lastActiveChatWasWithID")
+    div(v-if="store.lastActiveChatWasWithID")
+      ion-grid
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
-          ion-item
-            AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-              :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-              :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+          ion-row
+            ion-col
+              ion-item(v-if="!audio.sentByMe")
+
+                div(v-if="showAvatar(audio.chat_id)")
+                  ion-avatar
+
+
+                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+
+
+            ion-col
+              ion-item(v-if="audio.sentByMe" )
+                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+
 
   div
     ion-footer(id="footer")

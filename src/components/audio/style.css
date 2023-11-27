@@ -4,24 +4,17 @@
     float: right;
 }
 
-#titleAndTags {
-    margin-top: -10pt;
-    margin-bottom: 10pt;
+#audioTitle {
+    width: 250px;
+    font-size: 15px;
+
 }
 
-#titleAndTags input {
-    width: 100%;
-}
-
-#audioChip {
-    float: left;
-    display: inline;
-}
-
+/*
 input, textarea {
     background: none;
-    color: #c6c6c6;
-    font-size: 18px;
+    color: lawngreen;
+    font-size: 11px;
     padding: 10px 10px 10px 5px;
     display: block;
     width: 320px;
@@ -29,6 +22,7 @@ input, textarea {
     border-radius: 0;
     border-bottom: 1px solid #c6c6c6;
 }
+*/
 
 input:focus, textarea:focus {
     outline: none;
@@ -50,38 +44,42 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
 
 /* make canvas and audio be below each other and stretched */
 #audio-element {
-    margin-top: 15pt;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    width: 50%;
 }
 
-#wrapper {
-    width: 100vw; /* For 100% screen width */;
-    /*border: 1px solid black;*/
-    overflow: hidden; /* add this to contain floated children */
-}
 
-.avatarIsReceived {
-    /*border: 1px solid green;*/
-    margin-top: 10px;
+#first {
+    width: 60px;
+    float:left; /* add this */
+    padding-bottom: 30px;
+    border: 1px solid red;
+}
+#second {
+    border: 1px solid green;
+    width: 150px;
+    padding-bottom: 20px;
     float: left; /* add this */
-    bottom: 0;
 }
 
+
+
+/*
 .audioIsReceived {
-    width: 70vw; /* For 100% screen width */;
-    float: left; /* add this */
-    /*border: 1px solid red;*/
+    width: 70vw;
+    float: left;
+
 }
 
-.avatarIsSender {
-    /*border: 1px solid #f3d406;*/
-    margin-top: 10px;
-    float: right; /* add this */
-    bottom: 0;
+ */
+
+#visualiserDiv {
+    float: left;
+    border-color: #2dd36f;
 }
 
 .audioIsSender {
@@ -90,13 +88,6 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     /*border: 1px solid #002aff;*/
 }
 
-.speechBubbleSender {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto;
-    display: block;
-}
 
 #element-id {
     display: block;
@@ -112,4 +103,5 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
 
 #playPauseButton {
     padding-top: 50px;
+
 }

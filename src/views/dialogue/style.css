@@ -48,15 +48,17 @@
     padding-left: 30px;
     padding-top: 20px;
 }
+
 #dialoguePartnerAvatar {
     display: inline-block;
-    width:60px;
-    height:160px;
+    width: 60px;
+    height: 160px;
 }
+
 #dialoguePartnerName {
     display: inline-block;
-    width:300px;
-    height:120px;
+    width: 300px;
+    height: 120px;
 }
 
 #dialoguePartnerName ion-title {
@@ -84,4 +86,6 @@
 }
 
 
-
+#scrollToBottomFAB ion-fab {
+    margin-bottom: 80px;
+}

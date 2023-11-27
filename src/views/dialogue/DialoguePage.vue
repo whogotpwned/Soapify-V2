@@ -22,7 +22,7 @@ ion-page
         ion-icon(slot="end")
 
 
-  ion-content(:fullscreen="true" id="dialoguePage")
+  ion-content(:fullscreen="true" id="dialoguePage" ref="content")
     div(v-if="!store.lastActiveChatWasWithID" id="alone")
       div(align="center")
         h1(id="forever-alone-head") 🧐
@@ -35,7 +35,11 @@ ion-page
       ion-toolbar
         ion-title(size="large") Dialoge
 
+
+
     ExploreContainer(name="Tab 1 page")
+
+
 
     div(v-if="store.lastActiveChatWasWithID")
       ion-grid
@@ -61,6 +65,7 @@ ion-page
                     :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
+
           ion-item-sliding
             ion-item-options(side='start')
               ion-item-option(color='success')
@@ -72,6 +77,11 @@ ion-page
 
               ion-item-option(v-if="audio.sentByMe" color='danger' @click="deleteElement(audio.chat_id)")
                 ion-icon(slot='icon-only' :icon='trash')
+
+  div(v-if="receivedNewMessage" id="scrollToBottomFAB")
+    ion-fab(slot='fixed' vertical='bottom' horizontal='end' @click="scrollToBottomOfDialoguePage")
+      ion-fab-button
+        ion-icon(:icon='arrowDownCircleOutline')
 
   div
     ion-footer(id="footer")
@@ -101,7 +111,7 @@ import {
 
 import ExploreContainer from '@/components/ExploreContainer.vue';
 import {VoiceRecorder} from "capacitor-voice-recorder";
-import {recordingOutline, stopCircleOutline, trash, caretDownOutline, heart, archive} from 'ionicons/icons';
+import {recordingOutline, stopCircleOutline, trash, caretDownOutline, arrowDownCircleOutline, heart, archive} from 'ionicons/icons';
 import {userSessionStore} from "@/lib/store/userSession";
 import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
@@ -554,14 +564,7 @@ async function stopRecording() {
       chips: []
     }
 
-    setTimeout(() => {
-
-
-      // scroll down to bottom
-      const elem = document.getElementById(generatedChatId);
-      elem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
-      
-    }, 1000);
+    receivedNewMessage.value = true;
 
     audiosMerged.value.push(newAudioElement);
 
@@ -569,6 +572,12 @@ async function stopRecording() {
   }
 
 
+}
+
+function scrollToBottomOfDialoguePage() {
+  let reference = document.getElementById("dialoguePage");
+  reference.scrollToBottom(500);
+  receivedNewMessage.value = false;
 }
 
 function clearSearch() {

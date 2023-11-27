@@ -87,8 +87,8 @@ import {
   IonCardSubtitle, IonChip, IonCardContent, IonAccordionGroup, IonInput, modalController, IonActionSheet, createGesture
 } from '@ionic/vue';
 
-import {heart, trashBinOutline, playCircleOutline, stopCircleOutline, ellipsisVerticalOutline, trashBinOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
-import {trash, heart, archive} from "ionicons/icons";
+import {heart, trashBinOutline, ellipsisVerticalOutline, playCircleOutline, stopCircleOutline} from 'ionicons/icons';
+import {trash, archive} from "ionicons/icons";
 import {v4 as uuidv4} from 'uuid';
 import {AVBars} from 'vue-audio-visual';
 import {insertChipInChipsTable, updateChipsInChatsTable, updateTitleInChatsTable} from "@/lib/graphQL/mutations";

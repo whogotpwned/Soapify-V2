@@ -1,83 +1,28 @@
-<template>
-  <div  ref="htmlCardRef" >
-
-    <!--
-    <div v-if="!isChecked && isSender" class="ion-align-self-start">
-      <ion-button  id="deleteButton" fill="clear" @click="deleteElement(id)">Del
-        <ion-icon slot="end" :icon="trashBinOutline"></ion-icon>
-      </ion-button>
-    </div>
-    -->
-
-    <ion-card-header>
-
-      <!--
-      <div id="element-id">
-        <ion-text>
-          <ion-text color="danger">Element-ID: {{ id }}</ion-text>
-        </ion-text>
-      </div>
-      -->
-      <ion-card-title>
-        <ion-grid>
-          <ion-row justify-content-center>
-
-            <ion-col class="ion-align-items-center" size="auto">
-              <ion-input id="audioTitle" v-model="localTitle" :value="localTitle" class="ion-text-sm-center"
-                         label-placement="floating"
-                         readonly>
-              </ion-input>
-            </ion-col>
-
-          </ion-row>
-        </ion-grid>
-      </ion-card-title>
-
-      <ion-card-subtitle>
-        <div>
-          <ion-action-sheet
-              :buttons="actionSheetButtons"
-              :is-open="isOpen"
-              @didDismiss="setOpen(false)"
-          ></ion-action-sheet>
-        </div>
-
-      </ion-card-subtitle>
-
-    </ion-card-header>
-
-    <ion-card-content id="wrapper">
-
-      <div v-if="checkboxVisible">
-        <ion-item class="checkboxItem">
-          <ion-checkbox label-placement="start" @click="markCheckboxesToBeDeleted"></ion-checkbox>
-        </ion-item>
-      </div>
-      <div id="first">
-        <ion-button id="playPauseButton" @click="playPauseAudio">
-          <ion-icon slot="icon-only" :icon="playPauseButtonIcon"></ion-icon>
-        </ion-button>
-      </div>
-
-      <div id="second">
-        <div id="visualiserDiv">
-          <ion-row>
-            <ion-col class="ion-align-self-end">
-              <div :id="containerId" @click="playPauseAudio">
-
-              </div>
-            </ion-col>
-
-          </ion-row>
-
-        </div>
-      </div>
-    </ion-card-content>
-
-    <div id="dialogueTimestamp">
-      <p>{{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr</p>
-    </div>
-  </div>
+<template lang="pug">
+div(ref='htmlCardRef')
+  ion-card-header
+    ion-card-title
+      ion-grid
+        ion-row(justify-content-center='')
+          ion-col.ion-align-items-center(size='auto')
+            ion-input#audioTitle.ion-text-sm-center(v-model='localTitle' :value='localTitle' label-placement='floating' readonly='')
+    ion-card-subtitle
+      div
+        ion-action-sheet(:buttons='actionSheetButtons' :is-open='isOpen' @diddismiss='setOpen(false)')
+  ion-card-content#wrapper
+    div(v-if='checkboxVisible')
+      ion-item.checkboxItem
+        ion-checkbox(label-placement='start' @click='markCheckboxesToBeDeleted')
+    #first
+      ion-button#playPauseButton(@click='playPauseAudio')
+        ion-icon(slot='icon-only' :icon='playPauseButtonIcon')
+    #second
+      #visualiserDiv
+        ion-row
+          ion-col.ion-align-self-end
+            div(:id='containerId' @click='playPauseAudio')
+  #dialogueTimestamp
+    p {{ getHumanReadableTimestampFromCreatedAt(created_at) }} Uhr
 </template>
 
 <script lang="ts" setup>

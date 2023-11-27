@@ -43,17 +43,15 @@ ion-page
           div(v-if="!audio.sentByMe")
             ion-row
               ion-col(class="received")
-                ion-item(v-if="!audio.sentByMe")
-                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
               ion-col(class="sent")
 
           div(v-else)
             ion-row
               ion-col(class="received")
-                ion-item(v-if="!audio.sentByMe")
 
               ion-col(class="sent")
                 AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"

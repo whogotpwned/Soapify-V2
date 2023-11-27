@@ -43,9 +43,10 @@ ion-page
           div(v-if="!audio.sentByMe")
             ion-row
               ion-col(class="received")
-                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                div(:id="audio.chat_id")
+                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
               ion-col(class="sent")
 
@@ -54,9 +55,10 @@ ion-page
               ion-col(class="received")
 
               ion-col(class="sent")
-                AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
-                  :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
-                  :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
+                div(:id="audio.chat_id")
+                  AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
+                    :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
+                    :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
 
 
           ion-item-sliding
@@ -409,7 +411,7 @@ onMounted(async () => {
   }, {
     next(data) {
 
-      const fireNotificationAndShowScrollDownArrow = () => {
+      const fireNotification = () => {
         new_chat_toast.fire({
           icon: 'info',
           title: 'Neue Nachricht'
@@ -435,7 +437,7 @@ onMounted(async () => {
         })) {
           store.addDialogueToCurrentDialoguePartner(lastDialogue);
         }
-        fireNotificationAndShowScrollDownArrow();
+        fireNotification();
       }
     },
     complete() {
@@ -540,22 +542,30 @@ async function stopRecording() {
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
 
-  const newAudioElement = {
-    chat_id: generatedChatId,
-    created_at: getCurrentDateTimestamp(),
-    senderAvatar: store.getAvatarURL,
-    audio: audioBase64,
-    title: title,
-    sentByMe: true,
-    speech_to_text: speech.result.value,
-    user_id: store.getSessionID,
-    chips: []
+    const newAudioElement = {
+      chat_id: generatedChatId,
+      created_at: getCurrentDateTimestamp(),
+      senderAvatar: store.getAvatarURL,
+      audio: audioBase64,
+      title: title,
+      sentByMe: true,
+      speech_to_text: speech.result.value,
+      user_id: store.getSessionID,
+      chips: []
+    }
+
+    setTimeout(() => {
+
+
+      // TODO: Scroll here ....
+
+    }, 1000);
+
+    audiosMerged.value.push(newAudioElement);
+
+    store.addDialogueToCurrentDialoguePartner(newAudioElement);
   }
 
-  audiosMerged.value.push(newAudioElement);
-
-  store.addDialogueToCurrentDialoguePartner(newAudioElement);
-}
 
 }
 

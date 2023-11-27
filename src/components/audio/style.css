@@ -10,20 +10,6 @@
 
 }
 
-/*
-input, textarea {
-    background: none;
-    color: lawngreen;
-    font-size: 11px;
-    padding: 10px 10px 10px 5px;
-    display: block;
-    width: 320px;
-    border: none;
-    border-radius: 0;
-    border-bottom: 1px solid #c6c6c6;
-}
-*/
-
 input:focus, textarea:focus {
     outline: none;
 }
@@ -64,16 +50,6 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     float: left; /* add this */
 }
 
-
-
-/*
-.audioIsReceived {
-    width: 70vw;
-    float: left;
-
-}
-
- */
 
 #visualiserDiv {
     float: left;

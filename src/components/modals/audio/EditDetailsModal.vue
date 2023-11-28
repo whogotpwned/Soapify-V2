@@ -1,42 +1,23 @@
-<template>
-  <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button color="medium" @click="cancel"> Cancel
-        </ion-button>
-
-      </ion-buttons>
-
-
-      <ion-buttons slot="end">
-        <ion-button :strong="true" @click="confirm">Save</ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-content class="ion-padding">
-    <div>
-      <ion-item>
-        <ion-input v-model="localTitle" :value="localTitle" label="Title" label-placement="stacked"></ion-input>
-      </ion-item>
-    </div>
-
-
-    <div id="chipsInEditDetailsModel">
-      <ion-item>
-        <ion-input v-model="specificChip" label="Chips" label-placement="stacked" @keyup.enter="addChip"></ion-input>
-      </ion-item>
-    </div>
-
-    <div>
-      <ion-item v-for="chip in chips" id="audioChip">
-        <ion-chip color="tertiary">
-          {{ chip }}
-        </ion-chip>
-      </ion-item>
-    </div>
-
-  </ion-content>
+<template lang="pug">
+ion-header
+  ion-toolbar
+    ion-buttons(slot='start')
+      ion-button(color='medium' @click='cancel')
+        | Cancel
+    ion-buttons(slot='end')
+      ion-button(:strong='true' @click='confirm') Save
+ion-content.ion-padding
+  div
+    ion-item
+      ion-input(v-model='localTitle' :value='localTitle' label='Title' label-placement='stacked')
+  #chipsInEditDetailsModel
+    ion-item
+      ion-input(v-model='specificChip' label='Chips' label-placement='stacked' @keyup.enter='addChip')
+  div
+    div(v-if='chips.length > 0')
+      ion-item#audioChip(v-for='chip in chips')
+        ion-chip(color='tertiary')
+          | {{ chip }}
 </template>
 
 
@@ -65,7 +46,15 @@ const store = userSessionStore();
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 
+console.log(props.id)
+
+
 chips.value = store.getChipsOfDialoguePartnerFromChatWithChatId(props.id);
+
+console.log("---__--__-__")
+console.log(store.getChipsOfDialoguePartnerFromChatWithChatId(props.id)[store.getSessionID]);
+console.log("---__--__-__")
+
 
 async function changeTitle() {
 
@@ -114,8 +103,12 @@ function addChip() {
           return;
         }
 
-        //chips.value.push(specificChip.value);
-        store.addChipToCurrentDialoguePartner(specificChip.value, props.id);
+        console.log(specificChip.value);
+
+        console.log(":::: = " + chips.value);
+
+        chips.value.push(specificChip.value);
+        // store.addChipToCurrentDialoguePartner(specificChip.value, props.id);
 
         const event = new CustomEvent('addChip', {
           detail: {
@@ -124,9 +117,11 @@ function addChip() {
             isSender: props.isSender
           },
         });
+
         window.dispatchEvent(event);
 
       } catch (e) {
+        console.log(e);
         Swal.fire({
           title: 'Fehler :(',
           text: 'Hinzufügen fehlerhaft',
@@ -142,13 +137,29 @@ function addChip() {
 }
 
 async function checkIfTagExists(tag: string) {
+
+
+
   return new Promise((resolve, _) => {
-    chips.value.forEach((element) => {
-      if (tag === element.value) {
-        resolve(true);
-      }
-    })
-    resolve(false);
+
+    console.log("0000")
+    console.log(chips.value);
+    console.log("0000")
+
+
+
+    if (chips.value[store.getSessionID]) {
+
+
+      chips.value.forEach((element) => {
+        if (tag === element.value) {
+          resolve(true);
+        }
+      })
+      resolve(false);
+    } else {
+      resolve(false);
+    }
   })
 }
 

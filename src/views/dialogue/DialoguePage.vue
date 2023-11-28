@@ -203,17 +203,28 @@ async function refreshAllChats() {
 
     let dialogues = dialoguesBetweenIDAndContactResult.data.chats;
 
+    console.log("BLA")
+    console.log(dialogues);
+
     for (let i = 0; i < dialogues.length; i++) {
+      console.log("From NHOST: CHIPS::::")
+      console.log(dialogues[i].chips);
+
       const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
-        ids: dialogues[i].chips
+        ids: dialogues[i].chips[store.getSessionID]
       });
+
+      console.log(chipsOfSpecificDialogueBetweenIDAndContactResult);
 
       dialogues[i].chips = [];
 
-      chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
+      if (chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips) {
+        chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
 
-        dialogues[i].chips.push(chipElement.chip);
-      });
+          dialogues[i].chips.push(chipElement.chip);
+        });
+      }
+
     }
 
 
@@ -339,43 +350,6 @@ window.addEventListener('search', async (event: any) => {
       return targetChatIds.includes(audio.chat_id);
     });
   }
-});
-
-
-window.addEventListener('addChip', async (event: any) => {
-  const insertChipsResult = await nhost.graphql.request(insertChipInChipsTable, {
-    chips: [{chip: event.detail.tag}]
-  })
-
-  const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
-
-  const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
-    chat_id: event.detail.id,
-  });
-
-  const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
-
-  const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
-    chat_id: event.detail.id,
-    chips: [...chipsOfChatWithId, insertChipsResultId]
-  });
-
-
-  audiosMerged.value = audiosMerged.value.map((audio: any) => {
-    if (audio.chat_id === event.detail.id) {
-      audio["chips"].push(event.detail.tag);
-    }
-    return audio;
-  });
-});
-
-window.addEventListener('openDialogue', (event: any) => {
-  currentDialoguePartner.value = {
-    user: event.detail.user,
-    user_id: event.detail.user_id,
-    email: event.detail.email,
-    avatarUrl: store.getAvatarUrlFromContactInformationForID(event.detail.user_id)
-  };
 });
 
 window.addEventListener('deleteChip', (event: any) => {
@@ -543,12 +517,14 @@ async function stopRecording() {
     contact: store.getCurrentDialoguePartner.user_id,
     title: title,
     speech_to_text: speech.result.value,
-    chips: [],
+    chips: {[store.getSessionID] : []},
     user_id: store.getSessionID,
   });
 
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
+
+    console.log("The Architect: " + generatedChatId);
 
     const newAudioElement = {
       chat_id: generatedChatId,

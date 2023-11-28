@@ -2,13 +2,14 @@
 div(ref='htmlCardRef')
   ion-card-header
     ion-card-title
+      p(style="font-size: 6pt") {{id}}
       ion-grid
         ion-row(justify-content-center='')
           ion-col.ion-align-items-center(size='auto')
             ion-input#audioTitle.ion-text-sm-center(v-model='localTitle' :value='localTitle' label-placement='floating' readonly='')
     ion-card-subtitle
       div
-        ion-action-sheet(:buttons='actionSheetButtons' :is-open='isOpen' @diddismiss='setOpen(false)')
+        ion-action-sheet(:buttons='actionSheetButtons' :is-open='isOpen' @didDismiss='setOpen(false)')
   ion-card-content#wrapper
     div(v-if='checkboxVisible')
       ion-item.checkboxItem
@@ -96,6 +97,7 @@ const kopiertToast = Swal.mixin({
 
 const openEditDetailsModel = async () => {
 
+  console.log("+++ = > " + props.id);
   const modal = await modalController.create({
     component: EditDetailsModal,
     componentProps: {
@@ -125,21 +127,23 @@ const actionSheetButtons = [
   {
     text: 'EDIT DETAILS',
     handler: () => {
+      setOpen(false);
       openEditDetailsModel();
     }
   },
   {
     text: 'MARK TO DELETE',
     handler: () => {
+      setOpen(false);
       const event = new CustomEvent('checkboxVisibilityState')
       window.dispatchEvent(event)
-
     }
 
   },
   {
     text: 'TRANSSCRIPT',
     handler: () => {
+      setOpen(false);
       openTranscriptModal();
     }
   }
@@ -162,24 +166,16 @@ window.addEventListener('addChip', async (event: any) => {
       chat_id: event.detail.id,
     });
 
-    const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips;
+    const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips[store.getSessionID];
 
     const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
       chat_id: event.detail.id,
-      chips: [...chipsOfChatWithId, insertChipsResultId]
+      chips: {[store.getSessionID]: [...chipsOfChatWithId, insertChipsResultId]}
     });
 
 
-    props.audiosMerged = props.audiosMerged.map((audio: any) => {
-
-      if (audio.chat_id === event.detail.id) {
-        // extend object by tag
-        audio["chips"].push(event.detail.tag);
-      }
-      return audio;
-    });
   } catch (e) {
-
+    console.log(e)
   }
 
 });
@@ -277,6 +273,8 @@ function addChip(id: string) {
         return;
       }
 
+      console.log(specificChip);
+
       chips.value.push({value: specificChip.value})
 
       /* send tag to parent component  */
@@ -356,8 +354,11 @@ async function checkIfTagExists(tag: string) {
 }
 
 window.addEventListener('editDetailsModalChangesTitle', (event: any) => {
+  
+  if (event.detail.chat_id === props.id) {
+    localTitle.value = event.detail.title;
+  }
 
-  localTitle.value = event.detail.title;
 })
 
 

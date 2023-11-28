@@ -2,7 +2,6 @@
 div(ref='htmlCardRef')
   ion-card-header
     ion-card-title
-      p(style="font-size: 6pt") {{id}}
       ion-grid
         ion-row(justify-content-center='')
           ion-col.ion-align-items-center(size='auto')
@@ -97,7 +96,6 @@ const kopiertToast = Swal.mixin({
 
 const openEditDetailsModel = async () => {
 
-  console.log("+++ = > " + props.id);
   const modal = await modalController.create({
     component: EditDetailsModal,
     componentProps: {
@@ -273,8 +271,6 @@ function addChip(id: string) {
         return;
       }
 
-      console.log(specificChip);
-
       chips.value.push({value: specificChip.value})
 
       /* send tag to parent component  */
@@ -354,7 +350,7 @@ async function checkIfTagExists(tag: string) {
 }
 
 window.addEventListener('editDetailsModalChangesTitle', (event: any) => {
-  
+
   if (event.detail.chat_id === props.id) {
     localTitle.value = event.detail.title;
   }

@@ -46,15 +46,7 @@ const store = userSessionStore();
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 
-console.log(props.id)
-
-
 chips.value = store.getChipsOfDialoguePartnerFromChatWithChatId(props.id);
-
-console.log("---__--__-__")
-console.log(store.getChipsOfDialoguePartnerFromChatWithChatId(props.id)[store.getSessionID]);
-console.log("---__--__-__")
-
 
 async function changeTitle() {
 
@@ -103,10 +95,6 @@ function addChip() {
           return;
         }
 
-        console.log(specificChip.value);
-
-        console.log(":::: = " + chips.value);
-
         chips.value.push(specificChip.value);
         // store.addChipToCurrentDialoguePartner(specificChip.value, props.id);
 
@@ -138,19 +126,9 @@ function addChip() {
 
 async function checkIfTagExists(tag: string) {
 
-
-
   return new Promise((resolve, _) => {
 
-    console.log("0000")
-    console.log(chips.value);
-    console.log("0000")
-
-
-
     if (chips.value[store.getSessionID]) {
-
-
       chips.value.forEach((element) => {
         if (tag === element.value) {
           resolve(true);

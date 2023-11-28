@@ -73,6 +73,7 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     color: white;
     margin-left: 95pt;
     margin-bottom: 80pt;
+    padding-bottom: 130pt;
 }
 
 ion-col {
@@ -86,5 +87,4 @@ ion-grid {
 
 #playPauseButton {
     padding-top: 30px;
-
 }

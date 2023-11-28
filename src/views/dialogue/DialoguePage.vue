@@ -203,18 +203,11 @@ async function refreshAllChats() {
 
     let dialogues = dialoguesBetweenIDAndContactResult.data.chats;
 
-    console.log("BLA")
-    console.log(dialogues);
-
     for (let i = 0; i < dialogues.length; i++) {
-      console.log("From NHOST: CHIPS::::")
-      console.log(dialogues[i].chips);
 
       const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
         ids: dialogues[i].chips[store.getSessionID]
       });
-
-      console.log(chipsOfSpecificDialogueBetweenIDAndContactResult);
 
       dialogues[i].chips = [];
 
@@ -523,8 +516,6 @@ async function stopRecording() {
 
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;
-
-    console.log("The Architect: " + generatedChatId);
 
     const newAudioElement = {
       chat_id: generatedChatId,

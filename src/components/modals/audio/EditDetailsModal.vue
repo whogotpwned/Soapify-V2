@@ -1,11 +1,8 @@
 <template lang="pug">
 ion-header
   ion-toolbar
-    ion-buttons(slot='start')
-      ion-button(color='medium' @click='cancel')
-        | Cancel
     ion-buttons(slot='end')
-      ion-button(:strong='true' @click='confirm') Save
+      ion-button(:strong='true' @click='confirm') Ok
 ion-content.ion-padding
   div
     ion-item

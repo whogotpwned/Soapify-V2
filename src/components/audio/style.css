@@ -7,6 +7,8 @@
 #audioTitle {
     width: 250px;
     font-size: 15px;
+    margin-top: 60px;
+    padding-top: 30px;
 
 }
 
@@ -45,8 +47,7 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     padding-bottom: 41px;
 }
 #second {
-    width: 150px;
-    padding-bottom: 20px;
+    width: 130px;
     float: left; /* add this */
 }
 
@@ -62,18 +63,26 @@ input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid
     /*border: 1px solid #002aff;*/
 }
 
-
 #element-id {
     display: block;
     margin-bottom: 10pt;
-
 }
 
-#dialogueTimestamp p {
-    font-size: 8pt;
-    color: #ffffff;
-    margin-top: 10px;
+#humanReadableTimestamp {
+    font-size: 4pt;
+    color: white;
+    margin-left: 95pt;
+    margin-bottom: 80pt;
 }
+
+ion-col {
+    height: 85px;
+}
+
+ion-grid {
+    height: 70px;
+}
+
 
 #playPauseButton {
     padding-top: 30px;

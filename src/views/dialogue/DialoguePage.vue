@@ -47,7 +47,7 @@ ion-page
             ion-row
               ion-col(class="received")
                 div(v-if="showAvatarInDialoguePage(audio.chat_id)")
-                  ion-avatar(id="avatarInDialoguePage")
+                  ion-avatar(id="avatarInDialoguePage" class="dialogueAvatar")
                     div(v-if="audio.sentByMe")
                       img(:src="store.getCurrentDialoguePartner.avatarUrl")
                     div(v-else)
@@ -66,7 +66,7 @@ ion-page
 
               ion-col(class="sent")
                 div(v-if="showAvatarInDialoguePage(audio.chat_id)")
-                  ion-avatar(id="avatarInDialoguePage")
+                  ion-avatar(id="avatarInDialoguePage" class="dialogueAvatar")
                     div(v-if="audio.sentByMe")
                       img(:src="store.getCurrentDialoguePartner.avatarUrl")
                     div(v-else)

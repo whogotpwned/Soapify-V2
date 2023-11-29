@@ -40,9 +40,19 @@ ion-page
     div(v-if="store.lastActiveChatWasWithID")
       ion-grid
         div(v-for="audio in audiosMerged" key="audio.id" id="audioElementsMerged")
+
+
+
           div(v-if="!audio.sentByMe")
             ion-row
               ion-col(class="received")
+                div(v-if="showAvatarInDialoguePage(audio.chat_id)")
+                  ion-avatar(id="avatarInDialoguePage")
+                    div(v-if="audio.sentByMe")
+                      img(:src="store.getCurrentDialoguePartner.avatarUrl")
+                    div(v-else)
+                      img(:src="store.getAvatarURL")
+
                 div(:id="audio.chat_id")
                   AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
                     :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
@@ -55,12 +65,17 @@ ion-page
               ion-col(class="received")
 
               ion-col(class="sent")
+                div(v-if="showAvatarInDialoguePage(audio.chat_id)")
+                  ion-avatar(id="avatarInDialoguePage")
+                    div(v-if="audio.sentByMe")
+                      img(:src="store.getCurrentDialoguePartner.avatarUrl")
+                    div(v-else)
+                      img(:src="store.getAvatarURL")
+
                 div(:id="audio.chat_id")
                   AudioElement(:id="audio.chat_id" :key="audio.chat_id" :aChips="audio.chips" :isSender="audio.sentByMe"
                     :path="audio.audio" :senderAvatar="audio.senderAvatar" :spoken="audio.speech_to_text" :title="audio.title"
                     :checkboxVisible="checkboxVisible" :created_at="audio.created_at")
-
-
 
           ion-item-sliding
             ion-item-options(side='start')
@@ -178,6 +193,30 @@ async function openUserDetailsModal(avatar, user_id, email) {
   modal.present();
 }
 
+
+function showAvatarInDialoguePage(chat_id) {
+
+
+
+  const indexOfCurrentDialogue = audiosMerged.value.findIndex((audio: any) => {
+    return audio.chat_id === chat_id;
+  });
+
+  // get the index of the previous dialogue and the next dialogue
+  const indexOfPreviousDialogue = indexOfCurrentDialogue - 1;
+  const indexOfNextDialogue = indexOfCurrentDialogue + 1;
+
+  // check whether there is a previous dialogue and a next dialogue and
+  // whether the previous dialogue and the next dialogue are either both sent by me or both not sent by me
+  const previousDialogueExistsAndSentByMe = indexOfPreviousDialogue >= 0 && audiosMerged.value[indexOfPreviousDialogue].sentByMe === audiosMerged.value[indexOfCurrentDialogue].sentByMe;
+  const nextDialogueExistsAndSentByMe = indexOfNextDialogue < audiosMerged.value.length && audiosMerged.value[indexOfNextDialogue].sentByMe === audiosMerged.value[indexOfCurrentDialogue].sentByMe;
+
+
+  if (!previousDialogueExistsAndSentByMe && nextDialogueExistsAndSentByMe) {
+    return true;
+  } else return !previousDialogueExistsAndSentByMe && !nextDialogueExistsAndSentByMe;
+
+}
 
 async function refreshAllChats() {
 

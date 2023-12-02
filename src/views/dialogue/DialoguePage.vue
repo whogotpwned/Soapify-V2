@@ -249,7 +249,6 @@ async function refreshAllChats() {
           dialogues[i].chips = dataElement.chips;
         });
       }
-
     }
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);

@@ -252,7 +252,6 @@ async function refreshAllChats() {
           dialogues[i].chips.push(chipElement.chip);
         });
       }
-
     }
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
@@ -431,7 +430,10 @@ onMounted(async () => {
       const lastDialogue = data.data.chats[0];
 
       // TODO: Not really clean but works ...
-      lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
+      if(lastDialogue.chips[store.getCurrentDialoguePartner.user_id])
+        lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
+      else
+        lastDialogue.chips = [];
 
       if (!lastDialogue) return;
 

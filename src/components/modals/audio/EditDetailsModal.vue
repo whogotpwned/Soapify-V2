@@ -11,10 +11,9 @@ ion-content.ion-padding
     ion-item
       ion-input(v-model='specificChip' label='Chips' label-placement='stacked' @keyup.enter='addChip')
   div
-    div(v-if='chips.length > 0')
-      ion-item#audioChip(v-for='chip in chips')
-        ion-chip(color='tertiary')
-          | {{ chip }}
+    ion-item#audioChip(v-for='chip in chips')
+      ion-chip(color='tertiary')
+        | {{ chip }}
 </template>
 
 
@@ -43,7 +42,9 @@ const store = userSessionStore();
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 
+console.log(chips.value);
 chips.value = store.getChipsOfDialoguePartnerFromChatWithChatId(props.id);
+console.log(chips.value);
 
 async function changeTitle() {
 
@@ -92,8 +93,6 @@ function addChip() {
           return;
         }
 
-        console.log(chips.value);
-
         chips.value.push(specificChip.value);
 
         const event = new CustomEvent('addChip', {
@@ -125,6 +124,8 @@ function addChip() {
 async function checkIfTagExists(tag: string) {
 
   return new Promise((resolve, _) => {
+
+    console.log(chips.value)
 
     if (chips.value[store.getSessionID]) {
       chips.value.forEach((element) => {

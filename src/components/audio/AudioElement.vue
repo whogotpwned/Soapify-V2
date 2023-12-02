@@ -166,10 +166,14 @@ window.addEventListener('addChip', async (event: any) => {
 
     const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips[store.getSessionID];
 
+    // console.log(chipsOfChatWithId);
+
     const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
       chat_id: event.detail.id,
       chips: {[store.getSessionID]: [...chipsOfChatWithId, insertChipsResultId]}
     });
+
+    // console.log(updateChipsOfChatWithId);
 
 
   } catch (e) {

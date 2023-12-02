@@ -194,9 +194,6 @@ async function openUserDetailsModal(avatar, user_id, email) {
 
 
 function showAvatarInDialoguePage(chat_id) {
-
-
-
   const indexOfCurrentDialogue = audiosMerged.value.findIndex((audio: any) => {
     return audio.chat_id === chat_id;
   });
@@ -247,11 +244,13 @@ async function refreshAllChats() {
 
       dialogues[i].chips = [];
 
-      if (chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips) {
-        chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
-          dialogues[i].chips.push(chipElement.chip);
+
+      if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
+        chipsOfSpecificDialogueBetweenIDAndContactResult.data.forEach((dataElement) => {
+          dialogues[i].chips = dataElement.chips;
         });
       }
+
     }
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
@@ -419,6 +418,9 @@ onMounted(async () => {
   }, {
     next(data) {
 
+
+      console.log(data)
+
       const fireNotification = () => {
         new_chat_toast.fire({
           icon: 'info',
@@ -429,13 +431,16 @@ onMounted(async () => {
 
       const lastDialogue = data.data.chats[0];
 
+      if (!lastDialogue) return;
+
+
       // TODO: Not really clean but works ...
       if(lastDialogue.chips[store.getCurrentDialoguePartner.user_id])
         lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
       else
         lastDialogue.chips = [];
 
-      if (!lastDialogue) return;
+
 
       // check if chat_id of lastDialogue is already in audiosMerged.value and not add id to it
       if (audiosMerged.value.some((audio: any) => {

@@ -255,7 +255,6 @@ async function refreshAllChats() {
 
     }
 
-
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
 
@@ -429,13 +428,10 @@ onMounted(async () => {
         receivedNewMessage.value = true;
       };
 
-
       const lastDialogue = data.data.chats[0];
 
-
+      // TODO: Not really clean but works ...
       lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
-
-
 
       if (!lastDialogue) return;
 

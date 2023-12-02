@@ -92,8 +92,9 @@ function addChip() {
           return;
         }
 
+        console.log(chips.value);
+
         chips.value.push(specificChip.value);
-        // store.addChipToCurrentDialoguePartner(specificChip.value, props.id);
 
         const event = new CustomEvent('addChip', {
           detail: {

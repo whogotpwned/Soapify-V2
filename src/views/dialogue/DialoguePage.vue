@@ -171,7 +171,6 @@ onIonViewWillEnter(() => {
   refreshAllChats();
 });
 
-refreshAllChats();
 
 watch(() => audiosMerged.value, (newValue, oldValue) => {
   if (newValue !== oldValue) {
@@ -228,7 +227,6 @@ async function refreshAllChats() {
     user_id: store.getSessionID,
     contact: store.getCurrentDialoguePartner.user_id
   });
-
   const numberOfChatsBetweenIDAndContactNhost = numberOfChatsBetweenIDAndContactResult.data ? numberOfChatsBetweenIDAndContactResult.data.chats_aggregate.aggregate.count : 0;
   const numberOfChatsBetweenIDAndContactStore = store.getCurrentDialoguePartner.dialogues ? store.getCurrentDialoguePartner.dialogues.length : 0;
 
@@ -243,7 +241,6 @@ async function refreshAllChats() {
     let dialogues = dialoguesBetweenIDAndContactResult.data.chats;
 
     for (let i = 0; i < dialogues.length; i++) {
-
       const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
         ids: dialogues[i].chips[store.getSessionID]
       });
@@ -252,7 +249,6 @@ async function refreshAllChats() {
 
       if (chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips) {
         chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((chipElement) => {
-
           dialogues[i].chips.push(chipElement.chip);
         });
       }
@@ -262,8 +258,8 @@ async function refreshAllChats() {
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
+
   } else {
-    console.log("From Store")
     audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
   }
 
@@ -290,7 +286,7 @@ function getAudiosSortedByCreatedAt() {
 
 function handleRefresh(event: any) {
   try {
-    refreshAllChats();
+    // refreshAllChats();
     success_toast.fire({
       icon: 'success',
       title: 'Chats aktualisiert'
@@ -435,6 +431,11 @@ onMounted(async () => {
 
 
       const lastDialogue = data.data.chats[0];
+
+
+      lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
+
+
 
       if (!lastDialogue) return;
 

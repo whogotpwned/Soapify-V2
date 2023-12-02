@@ -244,7 +244,6 @@ async function refreshAllChats() {
 
       dialogues[i].chips = [];
 
-
       if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
         chipsOfSpecificDialogueBetweenIDAndContactResult.data.forEach((dataElement) => {
           dialogues[i].chips = dataElement.chips;

@@ -164,27 +164,16 @@ window.addEventListener('addChip', async (event: any) => {
       chat_id: event.detail.id,
     });
 
-    console.log(getChipsOfChatIdResult.data.chats[0].chips)
-    console.log("--->")
-    console.log(store.getSessionID)
-
-    console.log(event.detail)
 
     // set default target_id to store.getSessionID and overwrite with store.getCurrentDialoguePartnerID.user_id if isSender is false
     const target_id = event.detail.isSender ? store.getSessionID : store.getCurrentDialoguePartner.user_id;
 
-
     const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips[target_id];
-
-    // console.log(chipsOfChatWithId);
 
     const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
       chat_id: event.detail.id,
       chips: {[store.getSessionID]: [...chipsOfChatWithId, insertChipsResultId]}
     });
-
-    // console.log(updateChipsOfChatWithId);
-
 
   } catch (e) {
     console.log(e)

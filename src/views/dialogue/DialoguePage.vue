@@ -153,7 +153,6 @@ const speech = useSpeechRecognition({
 })
 
 
-
 const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
 const currentDialoguePartner = ref({});
@@ -174,9 +173,11 @@ onIonViewWillEnter(() => {
 
 watch(() => audiosMerged.value, (newValue, oldValue) => {
   if (newValue !== oldValue) {
-    audiosMerged.value.sort((a, b) => {
-      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    });
+    if (audiosMerged.value) {
+      audiosMerged.value.sort((a, b) => {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+    }
   }
 });
 
@@ -191,7 +192,6 @@ async function openUserDetailsModal(avatar, user_id, email) {
   })
   modal.present();
 }
-
 
 function showAvatarInDialoguePage(chat_id) {
   const indexOfCurrentDialogue = audiosMerged.value.findIndex((audio: any) => {
@@ -245,7 +245,7 @@ async function refreshAllChats() {
       dialogues[i].chips = [];
 
       if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
-        chipsOfSpecificDialogueBetweenIDAndContactResult.data.forEach((dataElement) => {
+        chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
           dialogues[i].chips = dataElement.chips;
         });
       }
@@ -259,18 +259,23 @@ async function refreshAllChats() {
   }
 
   // sort audiosMerged.value by created_at in descending order
-  audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
-    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-  })
+  if (audiosMerged.value) {
+    audiosMerged.value = audiosMerged.value.sort((a: any, b: any) => {
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    })
+  }
+
 
   // add another key to each audio element to indicate whether it was sent by me or not if user_id matches
   // store.getSessionID it is sent by me
-  audiosMerged.value = audiosMerged.value.map((audio: any) => {
-    audio.sentByMe = audio.user_id === store.getSessionID;
-    return audio;
-  });
+  if (audiosMerged.value) {
+    audiosMerged.value = audiosMerged.value.map((audio: any) => {
+      audio.sentByMe = audio.user_id === store.getSessionID;
+      return audio;
+    });
 
-  audiosMerged.value = getAudiosSortedByCreatedAt();
+    audiosMerged.value = getAudiosSortedByCreatedAt();
+  }
 }
 
 function getAudiosSortedByCreatedAt() {
@@ -281,7 +286,7 @@ function getAudiosSortedByCreatedAt() {
 
 function handleRefresh(event: any) {
   try {
-    // refreshAllChats();
+    refreshAllChats();
     success_toast.fire({
       icon: 'success',
       title: 'Chats aktualisiert'
@@ -415,10 +420,6 @@ onMounted(async () => {
     }
   }, {
     next(data) {
-
-
-      console.log(data)
-
       const fireNotification = () => {
         new_chat_toast.fire({
           icon: 'info',
@@ -572,12 +573,13 @@ async function stopRecording() {
 
     receivedNewMessage.value = true;
 
-    audiosMerged.value.push(newAudioElement);
-
-    store.addDialogueToCurrentDialoguePartner(newAudioElement);
+    try {
+      audiosMerged.value.push(newAudioElement);
+      store.addDialogueToCurrentDialoguePartner(newAudioElement);
+    } catch(e) {
+      refreshAllChats();
+    }
   }
-
-
 }
 
 function scrollToBottomOfDialoguePage() {

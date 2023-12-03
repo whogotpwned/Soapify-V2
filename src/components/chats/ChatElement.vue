@@ -14,8 +14,8 @@ ion-item-sliding
             ion-label {{contactUsername}}
           div(v-else)
             ion-label {{contactUserID}}
-        ion-col
-          ion-label(id="lastTimestamp") [{{lastAccessTimestamp}}]
+        //ion-col
+        //  ion-label(id="lastTimestamp") [{{lastAccessTimestamp}}]
 
   ion-item-options(side='end')
     ion-item-option

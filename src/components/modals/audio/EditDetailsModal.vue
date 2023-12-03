@@ -9,7 +9,7 @@ ion-content.ion-padding
       ion-input(v-model='localTitle' :value='localTitle' label='Title' label-placement='stacked')
   #chipsInEditDetailsModel
     ion-item
-      ion-input(v-model='specificChip' label='Chips' label-placement='stacked' @keyup.enter='addChip')
+      ion-input(v-model='specificChip' label='Chips' label-placement='stacked' @keyup.space='addChip')
   div
     ion-item#audioChip(v-for='chip in chips')
       ion-chip(color='tertiary')
@@ -81,7 +81,7 @@ function addChip() {
         return;
       }
       try {
-        if (hasWhiteSpace(specificChip.value)) {
+        if (specificChip.value === ' ') {
           Swal.fire({
             title: 'Fehler',
             text: 'Keine leeren Eingaben oder Leerzeichen erlaubt',

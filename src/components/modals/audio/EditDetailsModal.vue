@@ -125,7 +125,6 @@ async function checkIfTagExists(tag: string) {
 
   return new Promise((resolve, _) => {
 
-    console.log(chips.value)
 
     if (chips.value[store.getSessionID]) {
       chips.value.forEach((element) => {

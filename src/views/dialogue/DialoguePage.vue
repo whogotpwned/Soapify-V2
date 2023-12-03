@@ -238,15 +238,20 @@ async function refreshAllChats() {
     let dialogues = dialoguesBetweenIDAndContactResult.data.chats;
 
     for (let i = 0; i < dialogues.length; i++) {
+
       const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
         ids: dialogues[i].chips[store.getSessionID]
       });
 
       dialogues[i].chips = [];
 
+
       if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
         chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
-          dialogues[i].chips = dataElement.chips;
+
+          console.log(dataElement)
+
+          dialogues[i].chips.push(dataElement.chip);
         });
       }
     }

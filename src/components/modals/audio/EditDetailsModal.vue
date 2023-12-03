@@ -3,17 +3,28 @@ ion-header
   ion-toolbar
     ion-buttons(slot='end')
       ion-button(:strong='true' @click='confirm') Ok
+
+
 ion-content.ion-padding
+
   div
     ion-item
       ion-input(v-model='localTitle' :value='localTitle' label='Title' label-placement='stacked')
   #chipsInEditDetailsModel
-    ion-item
-      ion-input(v-model='specificChip' label='Chips' label-placement='stacked' @keyup.space='addChip')
+    ion-grid
+      ion-row
+        ion-col(size='10')
+          div
+            ion-input(v-model='specificChip' label='Chips' label-placement='stacked')
+        ion-col(size='1')
+          div
+            button(@click='addChip' shape="round") Add
+
   div
     ion-item#audioChip(v-for='chip in chips')
       ion-chip(color='tertiary')
         | {{ chip }}
+
 </template>
 
 

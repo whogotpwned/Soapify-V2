@@ -25,15 +25,15 @@ ion-page
     ion-list(:inset="true")
 
       ion-item
-        ion-icon(aria-hidden="true" :icon="idCardOutline" slot="start")
-        ion-label {{ personalID }}
+        ion-icon(aria-hidden="true" :icon="idCardOutline" slot="start" @click="copyToClipboard(personalID)")
+        ion-label(@click="copyToClipboard(personalID)") {{ personalID }}
 
       ion-item
-        ion-icon(aria-hidden="true" :icon="mailOutline" slot="start")
+        ion-icon(aria-hidden="true" :icon="mailOutline" slot="start" @click="copyToClipboard(personalEmail)")
         ion-label {{ personalEmail }}
 
       ion-item
-        ion-icon(aria-hidden="true" :icon="personOutline" slot="start")
+        ion-icon(aria-hidden="true" :icon="personOutline" slot="start" @click="copyToClipboard(personalUsername)")
         ion-input(v-model="personalUsername" @keyup.enter="changeUsername" :value="personalUsername" placeholder="Nutzername")
 
     ion-header(collapse="condense")
@@ -69,6 +69,8 @@ import {userSessionStore} from "@/lib/store/userSession";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
 import {updateUsername} from "@/lib/graphQL/mutations";
 import {strings} from "../../lib/strings";
+import copy from "copy-to-clipboard";
+import {presentAlert, presentSuccess} from "@/views/toasts/alerts";
 
 const personalID = ref('');
 const personalUsername = ref('');
@@ -146,6 +148,15 @@ async function changeUsername() {
       icon: 'error',
       title: 'Fehler beim Ändern des Nutzernamens'
     });
+  }
+}
+
+function copyToClipboard(text: string) {
+  try {
+    copy(text);
+    presentSuccess('Kopiert!');
+  } catch (e) {
+    presentAlert('Kopieren fehlgeschlagen!');
   }
 }
 

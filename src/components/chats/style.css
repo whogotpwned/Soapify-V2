@@ -18,3 +18,8 @@
     transform: translateX(15%);
     font-weight: bold;
 }
+
+ion-item {
+    --min-height: 120px;
+    min-height: 150px;
+}

@@ -244,7 +244,7 @@ async function refreshAllChats() {
       });
 
       dialogues[i].chips = [];
-      
+
       if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
         chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
           dialogues[i].chips.push(dataElement.chip);
@@ -433,24 +433,23 @@ onMounted(async () => {
 
       if (!lastDialogue) return;
 
-
       // TODO: Not really clean but works ...
       if(lastDialogue.chips[store.getCurrentDialoguePartner.user_id])
         lastDialogue.chips = lastDialogue.chips[store.getCurrentDialoguePartner.user_id]
       else
         lastDialogue.chips = [];
 
-
-
       // check if chat_id of lastDialogue is already in audiosMerged.value and not add id to it
-      if (audiosMerged.value.some((audio: any) => {
+      if (audiosMerged.value && audiosMerged.value.some((audio: any) => {
         return audio.chat_id === lastDialogue.chat_id;
       })) {
         console.log("Nothing to update for audios :)");
       } else {
+        if (!audiosMerged.value) location.reload();
+
         audiosMerged.value.push(lastDialogue);
 
-        if (!store.getCurrentDialoguePartner.dialogues.some((audio: any) => {
+        if (store.getCurrentDialoguePartner.dialogues && !store.getCurrentDialoguePartner.dialogues.some((audio: any) => {
           return audio.chat_id === lastDialogue.chat_id;
         })) {
           store.addDialogueToCurrentDialoguePartner(lastDialogue);
@@ -459,7 +458,7 @@ onMounted(async () => {
       }
     },
     complete() {
-      console.log('done');
+      refreshAllChats();
     },
     error(e) {
       console.log(e);

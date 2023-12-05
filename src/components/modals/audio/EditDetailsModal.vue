@@ -53,9 +53,7 @@ const store = userSessionStore();
 
 const cancel = () => modalController.dismiss(null, 'cancel');
 
-console.log(chips.value);
 chips.value = store.getChipsOfDialoguePartnerFromChatWithChatId(props.id);
-console.log(chips.value);
 
 async function changeTitle() {
 

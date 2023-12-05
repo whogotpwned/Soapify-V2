@@ -557,7 +557,7 @@ async function stopRecording() {
     contact: store.getCurrentDialoguePartner.user_id,
     title: title,
     speech_to_text: speech.result.value,
-    chips: {[store.getSessionID] : []},
+    chips: {[store.getSessionID] : [], [store.getCurrentDialoguePartner.user_id]: []},
     user_id: store.getSessionID,
   });
 

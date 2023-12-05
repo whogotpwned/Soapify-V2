@@ -158,31 +158,21 @@ window.addEventListener('addChip', async (event: any) => {
       chips: [{chip: event.detail.tag}]
     })
 
-
-    console.log("asssadsadsadsadasad")
-    console.log(insertChipsResult.data.insert_chips.returning)
-    console.log("sadasdadsasdsadsadsadsad")
-
     const insertChipsResultId = insertChipsResult.data.insert_chips.returning[0].id;
 
     const getChipsOfChatIdResult = await nhost.graphql.request(getChipsOfChatId, {
       chat_id: event.detail.id,
     });
 
-
-    // set default target_id to store.getSessionID and overwrite with store.getCurrentDialoguePartnerID.user_id if isSender is false
-    // const target_id = event.detail.isSender ? store.getSessionID : store.getCurrentDialoguePartner.user_id;
-
-    console.log("------------------>")
-    console.log(getChipsOfChatIdResult.data.chats[0].chips);
-    console.log(store.getSessionID)
-    console.log("------------------>")
-
-    const chipsOfChatWithId = getChipsOfChatIdResult.data.chats[0].chips[store.getSessionID];
+    const chipsOfChatWithIdOwn = getChipsOfChatIdResult.data.chats[0].chips[store.getSessionID];
+    const chipsOfChatWithIdOther = getChipsOfChatIdResult.data.chats[0].chips[store.getCurrentDialoguePartner.user_id];
 
     const updateChipsOfChatWithId = await nhost.graphql.request(updateChipsInChatsTable, {
       chat_id: event.detail.id,
-      chips: {[store.getSessionID]: [...chipsOfChatWithId, insertChipsResultId]}
+      chips: {
+        [store.getSessionID]: [...chipsOfChatWithIdOwn, insertChipsResultId],
+        [store.getCurrentDialoguePartner.user_id]: [...chipsOfChatWithIdOther],
+      }
     });
 
   } catch (e) {

@@ -1,0 +1,1 @@
+import{aI as s}from"./index-cd9c2231.js";const r=async e=>{await(await s.create({header:"Fehler",subHeader:"Aktion nicht erfolgreich",message:e,buttons:["OK"]})).present()},c=async e=>{await(await s.create({header:"Erfolg",subHeader:"Aktion erfolgreich",message:e,buttons:["OK"]})).present()};export{r as a,c as p};

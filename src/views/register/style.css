@@ -1,8 +1,14 @@
 #registerForm {
+    background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWpkdHE3cWtkaDc5bG10amozenV6YjNuZ2tzdGFxZHN3emNzMWc0NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l5JbspfwZ0yjHjlJ0K/giphy.gif');
+    background-size: cover;
+
     margin: auto;
     position: absolute;
-    top: 50%;
-    left: 50%;
     width: 100%;
-    transform: translate(-50%, -50%);
+    height: 100vh;
+
+}
+
+#registerForm > ion-card {
+    margin-top: 150px;
 }

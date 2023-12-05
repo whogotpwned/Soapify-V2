@@ -1,0 +1,1 @@
+import{d as e,o,g as n,_}from"./index-cd9c2231.js";const t={id:"container"},a=e({__name:"ExploreContainer",props:{name:String},setup(r){return(s,c)=>(o(),n("div",t))}});const i=_(a,[["__scopeId","data-v-a82744c8"]]);export{i as E};

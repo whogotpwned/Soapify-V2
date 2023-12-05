@@ -16,7 +16,7 @@ ion-page
       ion-button(id="loginButton" expand="block" shape="round" @click="signUp") Registrieren
       div(id="registerLink" align="center")
         p {{ strings.de.registration["have-account-question"] }}
-        ion-button(fill="clear") {{ strings.de.labels.login }}
+        ion-button(fill="clear" @click="gotoLogin") {{ strings.de.labels.login }}
 </template>
 
 <script lang="ts" setup>
@@ -51,6 +51,9 @@ function passwordDoesNotMatchPasswordRep() {
   }
 }
 
+function gotoLogin() {
+  self.window.location.replace('/login')
+}
 
 function signUp() {
   if (passwordDoesNotMatchPasswordRep()) {

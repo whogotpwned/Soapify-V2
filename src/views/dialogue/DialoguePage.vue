@@ -244,13 +244,9 @@ async function refreshAllChats() {
       });
 
       dialogues[i].chips = [];
-
-
+      
       if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
         chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
-
-          console.log(dataElement)
-
           dialogues[i].chips.push(dataElement.chip);
         });
       }

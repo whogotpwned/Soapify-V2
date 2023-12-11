@@ -12,11 +12,14 @@ ion-page
 
         ion-item
           ion-input(v-model="passwordRep" :label="strings.de.labels['password-repeat']" type="password")
+
     ion-card
       ion-button(id="loginButton" expand="block" shape="round" @click="signUp") Registrieren
       div(id="registerLink" align="center")
         p {{ strings.de.registration["have-account-question"] }}
         ion-button(fill="clear" @click="gotoLogin") {{ strings.de.labels.login }}
+
+
 </template>
 
 <script lang="ts" setup>

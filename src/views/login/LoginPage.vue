@@ -8,7 +8,6 @@ ion-page
           ion-input(v-model="email" label="E-Mail-Adresse" type="email")
         ion-item
           ion-input(v-model="password" label="Passwort" type="password" @keyup.enter="login")
-
     ion-card
       ion-button(id="loginButton" expand="block" shape="round" @click="login") Einloggen
       div(id="registerLink" align="center")
@@ -37,6 +36,29 @@ const showLoading = async () => {
   });
   loading.present();
 };
+
+async function loginWithMagicLink() {
+  try {
+
+    const signInResult = await nhost.auth.signIn({
+      email: 'tayfilmaz@gmail.com'
+    })
+
+
+    console.log(signInResult);
+
+
+
+
+
+
+    } catch (e) {
+    error_toast.fire({
+      icon: 'error',
+      title: 'Fehler beim Einloggen'
+    });
+  }
+}
 
 const stopLoading = async () => {
   await loadingController.dismiss();

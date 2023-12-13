@@ -73,6 +73,19 @@ export const insertNewDialogue = gql`
     }`
 
 
+export const insertNewDialogueText = gql`
+    mutation insertNewDialogueText($contact: uuid!, $user_id: uuid!, $text_message: String!) {
+        insert_chats_one(object: {
+            contact: $contact, 
+            user_id: $user_id,
+            text_only: true, 
+            text_message: $text_message
+        }) {
+            chat_id
+        }
+    }`
+
+
 export const insertChipInChipsTable = gql`
     mutation insertChipInChipsTable($chips: [chips_insert_input!]!) {
         insert_chips(objects: $chips, on_conflict: {constraint: chips_pkey, update_columns: last_used}) {

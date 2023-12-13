@@ -49,6 +49,24 @@
     padding-top: 20px;
 }
 
+.parent {
+    margin: 1rem;
+    padding: 2rem 2rem;
+    text-align: center;
+}
+
+
+.child {
+    display: inline-block;
+    border: 1px solid red;
+    padding: 1rem 0.6rem;
+    vertical-align: middle;
+}
+
+#sendTextInput {
+    width: 100%;
+}
+
 #dialoguePartnerAvatar {
     display: inline-block;
     width: 60px;
@@ -99,4 +117,15 @@
 
 #scrollToBottomFAB ion-fab {
     margin-bottom: 80px;
+}
+
+
+#first {
+    width: 60px;
+    float:left; /* add this */
+    padding-bottom: 41px;
+}
+#second {
+    width: 130px;
+    float: left; /* add this */
 }

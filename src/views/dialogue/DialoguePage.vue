@@ -95,13 +95,22 @@ ion-page
         ion-fab-button
           ion-icon(:icon='arrowDownCircleOutline')
 
+
   div
     ion-footer(id="footer")
       ion-toolbar(id="footerToolbar")
         div(v-if="store.currentDialoguePartner.user_id")
-          div(v-if="!isRecording")
-            ion-button(id="recordingButton" shape="round" @click="startRecording()")
-              ion-icon(slot="icon-only" :icon="recordingOutline")
+          div#parent(v-if="!isRecording")
+              ion-grid
+                ion-row
+                  ion-col(size="7")
+                    input(id="sendTextInput" v-model="textToBeSent" @ionFocus="showKeyBoard")
+                  ion-col
+                    ion-button(id="recordingButton" shape="round" @click="startRecording()")
+                      ion-icon(slot="icon-only" :icon="recordingOutline")
+                  ion-col
+                    ion-button(id="sendButton" shape="round" @click="sendTextMessage()")
+                      ion-icon(slot="icon-only" :icon="sendOutline")
           div(v-else)
             ion-button(id="recordingButton" shape="round" @click="stopRecording()")
               ion-icon(slot="icon-only" :icon="stopCircleOutline")
@@ -129,7 +138,7 @@ import {getCurrentDateTimestamp} from "@/views/dialogue/methods";
 import {
   deleteChatInChatsTableByUserIdAndChatId, deleteMultipleChatsInChatsTableByUserIdAndChatIds,
   insertChipInChipsTable,
-  insertNewDialogue,
+  insertNewDialogue, insertNewDialogueText,
   updateChipsInChatsTable
 } from "@/lib/graphQL/mutations";
 import {nhost} from "@/lib/nhostSrc/client/nhostClient";
@@ -145,6 +154,11 @@ import {createClient} from 'graphql-ws';
 import ShowContactDetailsModal from "@/components/modals/contact/details/ShowContactDetailsModal.vue";
 import AudioElement from "@/components/audio/AudioElement.vue";
 import { TransitionFade } from '@morev/vue-transitions';
+import { Keyboard } from '@capacitor/keyboard';
+import {isPlatform, getPlatforms} from "@ionic/vue";
+import {sendOutline} from "ionicons/icons";
+
+
 
 const lang = ref('de-DE')
 const speech = useSpeechRecognition({
@@ -164,11 +178,39 @@ const audiosBackupMerged = ref([] as Array<Object>);
 const audioElementsToBeDeleted = ref([] as Array<String>);
 const receivedNewMessage = ref(false);
 const checkboxVisible = ref(false);
+const textToBeSent = ref('');
 
 
 onIonViewWillEnter(() => {
   refreshAllChats();
 });
+
+
+function showKeyBoard() {
+  console.log(getPlatforms())
+  if(isPlatform('ios') || isPlatform('android')) {
+    Keyboard.show();
+  }
+}
+
+
+async function sendTextMessage() {
+
+  console.log("---")
+  console.log(textToBeSent.value);
+  console.log("---")
+
+  const sendTextResult = await nhost.graphql.request(insertNewDialogueText, {
+    text_message: textToBeSent.value,
+    contact: store.getCurrentDialoguePartner.user_id,
+    user_id: store.getSessionID
+  });
+
+  textToBeSent.value = "";
+}
+
+
+
 
 
 watch(() => audiosMerged.value, (newValue, oldValue) => {
@@ -555,6 +597,7 @@ async function stopRecording() {
     chips: {[store.getSessionID] : [], [store.getCurrentDialoguePartner.user_id]: []},
     user_id: store.getSessionID,
   });
+
 
   if(insertNewDialogueResult.data) {
     const generatedChatId = insertNewDialogueResult.data.insert_chats_one.chat_id;

@@ -77,6 +77,8 @@ export const getDialoguesBetweenIDAndContact = gql`
             chips
             chat_id
             audio
+            text_message
+            text_only
         }
     }`
 
@@ -99,6 +101,8 @@ export const getDialoguesBetweenIDAndContactSubscription = gql`
             chips
             chat_id
             audio
+            text_message
+            text_only
         }
     }`
 

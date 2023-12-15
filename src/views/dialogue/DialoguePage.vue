@@ -169,6 +169,7 @@ const speech = useSpeechRecognition({
 
 const store = userSessionStore();
 const audiosMerged = ref([] as Array<Object>);
+const textMesssagesMerged = ref([] as Array<Object>);
 const currentDialoguePartner = ref({});
 const isRecording = ref(false);
 const titleSearch = ref('');
@@ -205,6 +206,8 @@ async function sendTextMessage() {
     contact: store.getCurrentDialoguePartner.user_id,
     user_id: store.getSessionID
   });
+
+  console.log(sendTextResult);
 
   textToBeSent.value = "";
 }
@@ -281,24 +284,42 @@ async function refreshAllChats() {
 
     for (let i = 0; i < dialogues.length; i++) {
 
-      const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
-        ids: dialogues[i].chips[store.getSessionID]
-      });
+      if (dialogues[i].text_only === false) {
+        try {
+          const chipsOfSpecificDialogueBetweenIDAndContactResult = await nhost.graphql.request(getChipsWithId, {
+            ids: dialogues[i].chips[store.getSessionID]
+          });
 
-      dialogues[i].chips = [];
+          dialogues[i].chips = [];
 
-      if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
-        chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
-          dialogues[i].chips.push(dataElement.chip);
-        });
+          if(chipsOfSpecificDialogueBetweenIDAndContactResult.data) {
+            chipsOfSpecificDialogueBetweenIDAndContactResult.data.chips.forEach((dataElement) => {
+              dialogues[i].chips.push(dataElement.chip);
+            });
+          }
+        } catch (e) {
+
+        }
       }
     }
 
     store.setDialoguesOfCurrentDialoguePartner(dialogues);
-    audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
+    // add elements to audiosMerged.value where text_only is false
+    audiosMerged.value = dialogues.filter((audio: any) => {
+      return audio.text_only === false;
+    });
 
+    // add all those elements from dialogues to textMesssagesMerged where text_only is true
+    textMesssagesMerged.value = dialogues.filter((audio: any) => {
+      return audio.text_only === true;
+    });
   } else {
-    audiosMerged.value = store.getCurrentDialoguePartner.dialogues;
+
+    // add elements from store.getCurrentDialoguePartner.dialogues to audiosMerged.value where text_only is false
+    audiosMerged.value = store.getCurrentDialoguePartner.dialogues.filter((audio: any) => {
+      return audio.text_only === false;
+    });
+    
   }
 
   // sort audiosMerged.value by created_at in descending order
